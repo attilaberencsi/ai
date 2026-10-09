@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { installOptions, launchSpec } from '../lib/install'
+import { SCOPE_LABELS, installOptions, launchSpec, type Scope } from '../lib/install'
 import { catalogOf } from '../lib/registry'
 import type { ServerEntry } from '../lib/types'
 
@@ -8,10 +8,14 @@ const props = defineProps<{ entry: ServerEntry }>()
 
 const server = computed(() => props.entry.server)
 const meta = computed(() => catalogOf(props.entry))
-const options = computed(() => installOptions(server.value))
+const scope = ref<Scope>('user')
+const options = computed(() => installOptions(server.value, scope.value))
 const vscode = computed(() => options.value.find((o) => o.id === 'vscode'))
 const selectedId = ref('claude-code')
 const selected = computed(() => options.value.find((o) => o.id === selectedId.value) ?? options.value[0])
+// Scopes offered in the dropdown: those the selected client supports.
+const scopeChoices = computed(() => selected.value?.scopes ?? [])
+const scopeNotHonored = computed(() => selected.value && selected.value.scope !== scope.value)
 const kind = computed(() => {
   const s = launchSpec(server.value)
   return s ? (s.kind === 'remote' ? 'Remote' : 'Local') : 'n/a'
@@ -61,7 +65,8 @@ async function copy(text: string) {
     </ul>
 
     <div class="install">
-      <a v-if="vscode && vscode.link" class="btn primary" :href="vscode.link">Install in VS Code</a>
+      <a v-if="vscode?.link" class="btn primary" :href="vscode.link">Install in VS Code</a>
+      <button v-else-if="vscode?.copy" class="btn primary" @click="copy(vscode.copy)">Copy .vscode/mcp.json entry</button>
       <button v-else class="btn primary" disabled :title="vscode?.unavailable">Install in VS Code</button>
 
       <div class="copy-row">
@@ -76,6 +81,19 @@ async function copy(text: string) {
           {{ selected.linkLabel ?? 'Open' }}
         </a>
       </div>
+
+      <div class="scope-row">
+        <label :for="`scope-${server.name}`">Scope</label>
+        <select :id="`scope-${server.name}`" v-model="scope" class="select" :disabled="scopeChoices.length < 2">
+          <option v-for="s in (['user', 'project', 'local'] as Scope[])" :key="s" :value="s" :disabled="!scopeChoices.includes(s)">
+            {{ SCOPE_LABELS[s] }}
+          </option>
+        </select>
+      </div>
+      <p v-if="selected && !selected.unavailable" class="target">
+        Installs to: {{ selected.target }}
+        <span v-if="scopeNotHonored"> - {{ selected.label }} has no {{ SCOPE_LABELS[scope].split(' ')[0].toLowerCase() }} scope; using {{ selected.scope }}.</span>
+      </p>
 
       <p v-if="selected?.unavailable" class="note warn">{{ selected.unavailable }}</p>
       <template v-else>

@@ -35,3 +35,7 @@ TypeScript pinned to ~5.9 because vue-tsc 3.3 does not work with TypeScript 7.
 ## 2026-10-09 - Install links
 VS Code (`vscode:mcp/install?`), Cursor (`cursor://...mcp/install`) are real deep links. No official Claude MCP install link exists:
 claude.ai connector prefill (`?modal=add-custom-connector&connectorName&connectorUrl`) is unofficial/unverified; `claude-cli://open?q=` only pre-fills a prompt.
+
+## 2026-10-09 - Install scopes modelled as user / project / local
+One shared Scope enum; each client declares which it supports and falls back to user (or its only scope) otherwise.
+Where a client has no CLI/deep-link for a scope (VS Code workspace, Cursor project, Codex project), we output the config-file snippet instead.

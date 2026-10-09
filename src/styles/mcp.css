@@ -59,3 +59,8 @@
 .note { margin: 0; font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 .note.warn { color: #ffcf7a; }
 .server footer { font-size: 0.8rem; }
+
+.scope-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+.scope-row .select { flex: 1; }
+.select:disabled { opacity: 0.6; }
+.target { margin: 0; font-size: 0.75rem; color: var(--cyan); overflow-wrap: anywhere; }

@@ -5,9 +5,24 @@ export type LaunchSpec =
   | { kind: 'stdio'; command: string; args: string[]; env: Record<string, string> }
   | { kind: 'remote'; transport: 'http' | 'sse'; url: string; headers: Record<string, string> }
 
+/** user = all your projects; project = shared via the repo; local = this project only, private (Claude Code). */
+export type Scope = 'user' | 'project' | 'local'
+
+export const SCOPE_LABELS: Record<Scope, string> = {
+  user: 'User (all projects)',
+  project: 'Project (shared in repo)',
+  local: 'Local (this project, private)',
+}
+
 export interface InstallOption {
   id: string
   label: string
+  /** Scopes this client can install into. */
+  scopes: Scope[]
+  /** Scope actually used (the requested one, or the client's fallback when unsupported). */
+  scope: Scope
+  /** Where the server ends up, e.g. a config file. */
+  target?: string
   /** Text copied to the clipboard (command or config snippet). */
   copy?: string
   /** URL opened in a new tab / handed to the OS URL handler. */
@@ -18,15 +33,15 @@ export interface InstallOption {
   unavailable?: string
 }
 
-const CLIENTS: [id: string, label: string][] = [
-  ['vscode', 'VS Code'],
-  ['vscode-insiders', 'VS Code Insiders'],
-  ['cursor', 'Cursor'],
-  ['claude-code', 'Claude Code'],
-  ['claude-ai', 'Claude (connector)'],
-  ['claude-desktop', 'Claude Desktop (config)'],
-  ['gemini', 'Gemini CLI'],
-  ['codex', 'Codex CLI'],
+const CLIENTS: [id: string, label: string, scopes: Scope[]][] = [
+  ['vscode', 'VS Code', ['user', 'project']],
+  ['vscode-insiders', 'VS Code Insiders', ['user', 'project']],
+  ['cursor', 'Cursor', ['user', 'project']],
+  ['claude-code', 'Claude Code', ['local', 'project', 'user']],
+  ['claude-ai', 'Claude (connector)', ['user']],
+  ['claude-desktop', 'Claude Desktop (config)', ['user']],
+  ['gemini', 'Gemini CLI', ['user', 'project']],
+  ['codex', 'Codex CLI', ['user', 'project']],
 ]
 
 const PLACEHOLDER_NOTE = 'Replace <PLACEHOLDER> values with your own credentials before running.'
@@ -109,27 +124,32 @@ function clientConfig(spec: LaunchSpec) {
   return { command: spec.command, args: spec.args, ...(hasEntries(spec.env) ? { env: spec.env } : {}) }
 }
 
-function vscodeConfig(name: string, spec: LaunchSpec) {
+/** VS Code server entry (without the name). */
+function vscodeEntry(spec: LaunchSpec) {
   if (spec.kind === 'remote') {
-    return { name, type: spec.transport, url: spec.url, ...(hasEntries(spec.headers) ? { headers: spec.headers } : {}) }
+    return { type: spec.transport, url: spec.url, ...(hasEntries(spec.headers) ? { headers: spec.headers } : {}) }
   }
-  return { name, type: 'stdio', command: spec.command, args: spec.args, ...(hasEntries(spec.env) ? { env: spec.env } : {}) }
+  return { type: 'stdio', command: spec.command, args: spec.args, ...(hasEntries(spec.env) ? { env: spec.env } : {}) }
 }
 
 const b64 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
 
-function claudeCodeCommand(name: string, spec: LaunchSpec): string {
+// Claude Code's default scope is local, so the flag is only emitted for project/user.
+function claudeCodeCommand(name: string, spec: LaunchSpec, scope: Scope): string {
+  const scopeFlag = scope === 'local' ? [] : ['--scope', scope]
   if (spec.kind === 'remote') {
-    return sh(['claude', 'mcp', 'add', '--transport', spec.transport, name, spec.url, ...headerFlags(spec.headers)])
+    return sh(['claude', 'mcp', 'add', '--transport', spec.transport, ...scopeFlag, name, spec.url, ...headerFlags(spec.headers)])
   }
-  return sh(['claude', 'mcp', 'add', name, ...envFlags('-e', spec.env), '--', spec.command, ...spec.args])
+  return sh(['claude', 'mcp', 'add', name, ...scopeFlag, ...envFlags('-e', spec.env), '--', spec.command, ...spec.args])
 }
 
-function geminiCommand(name: string, spec: LaunchSpec): string {
+// Gemini CLI defaults to project scope, so the scope is always explicit.
+function geminiCommand(name: string, spec: LaunchSpec, scope: Scope): string {
+  const scopeFlag = ['--scope', scope]
   if (spec.kind === 'remote') {
-    return sh(['gemini', 'mcp', 'add', '--transport', spec.transport, ...headerFlags(spec.headers), name, spec.url])
+    return sh(['gemini', 'mcp', 'add', '--transport', spec.transport, ...scopeFlag, ...headerFlags(spec.headers), name, spec.url])
   }
-  return sh(['gemini', 'mcp', 'add', ...envFlags('-e', spec.env), name, spec.command, ...spec.args])
+  return sh(['gemini', 'mcp', 'add', ...scopeFlag, ...envFlags('-e', spec.env), name, spec.command, ...spec.args])
 }
 
 function codexCommand(name: string, spec: LaunchSpec): string {
@@ -137,69 +157,115 @@ function codexCommand(name: string, spec: LaunchSpec): string {
   return sh(['codex', 'mcp', 'add', name, ...envFlags('--env', spec.env), '--', spec.command, ...spec.args])
 }
 
-/** All install options for a server, in display order (see CLIENTS). */
-export function installOptions(server: ServerDetail): InstallOption[] {
+const tomlStr = (s: string) => JSON.stringify(s)
+
+/** Codex config.toml table for a server (used for the project-scoped .codex/config.toml). */
+export function codexToml(name: string, spec: LaunchSpec): string {
+  const key = /^[A-Za-z0-9_-]+$/.test(name) ? name : tomlStr(name)
+  if (spec.kind === 'remote') return `[mcp_servers.${key}]\nurl = ${tomlStr(spec.url)}\n`
+  const lines = [`[mcp_servers.${key}]`, `command = ${tomlStr(spec.command)}`, `args = [${spec.args.map(tomlStr).join(', ')}]`]
+  if (hasEntries(spec.env)) {
+    lines.push('', `[mcp_servers.${key}.env]`, ...Object.entries(spec.env).map(([k, v]) => `${k} = ${tomlStr(v)}`))
+  }
+  return lines.join('\n') + '\n'
+}
+
+/** The scope a client actually uses: the requested one if supported, else its most sensible fallback. */
+function effectiveScope(scopes: Scope[], requested: Scope): Scope {
+  if (scopes.includes(requested)) return requested
+  return scopes.includes('user') ? 'user' : scopes[0]
+}
+
+/** All install options for a server, in display order (see CLIENTS), for the requested scope. */
+export function installOptions(server: ServerDetail, requested: Scope = 'user'): InstallOption[] {
   const spec = launchSpec(server)
   if (!spec) {
     const why = 'No supported remote or package (npm, pypi, oci) found for this server.'
-    return CLIENTS.map(([id, label]) => ({ id, label, unavailable: why }))
+    return CLIENTS.map(([id, label, scopes]) => ({ id, label, scopes, scope: effectiveScope(scopes, requested), unavailable: why }))
   }
   const name = shortName(server)
   const needsCreds = spec.kind === 'stdio' ? hasEntries(spec.env) : hasEntries(spec.headers)
-  const note = needsCreds ? PLACEHOLDER_NOTE : undefined
   const join = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(' ') || undefined
+  const credNote = (scope: Scope) =>
+    !needsCreds ? undefined : scope === 'project' ? `${PLACEHOLDER_NOTE} This file is committed to your repo: never put real secrets in it.` : PLACEHOLDER_NOTE
 
-  const vsc = JSON.stringify(vscodeConfig(name, spec))
-  const vscCli = `--add-mcp "${vsc.replace(/"/g, '\\"')}"`
+  const entry = vscodeEntry(spec)
+  const vscJson = JSON.stringify({ name, ...entry })
+  const vscCli = `--add-mcp "${vscJson.replace(/"/g, '\\"')}"`
+  const vscWorkspace = JSON.stringify({ servers: { [name]: entry } }, null, 2)
   const mcpJson = JSON.stringify({ mcpServers: { [name]: clientConfig(spec) } }, null, 2)
   const cursorLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(name)}&config=${encodeURIComponent(b64(JSON.stringify(clientConfig(spec))))}`
-  const claudeCmd = claudeCodeCommand(name, spec)
-  const claudePrompt = `Add this MCP server to my Claude Code setup by running: ${claudeCmd}`
-
-  const claudeAi: InstallOption =
-    spec.kind === 'remote'
-      ? {
-          id: 'claude-ai',
-          label: '',
-          copy: spec.url,
-          link: `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=${encodeURIComponent(name)}&connectorUrl=${encodeURIComponent(spec.url)}`,
-          linkLabel: 'Add to Claude',
-          note: 'Opens claude.ai Add custom connector. Prefill is unofficial - if fields are empty, paste the copied URL.',
-        }
-    : {
-          id: 'claude-ai',
-          label: '',
-          unavailable: 'Connectors need a remote (URL) server; this one runs locally. Use Claude Code or Claude Desktop (config).',
-        }
-
   const desktopEntry = spec.kind === 'remote' ? { command: 'npx', args: ['-y', 'mcp-remote', spec.url] } : clientConfig(spec)
 
-  const byId: Record<string, Omit<InstallOption, 'id' | 'label'>> = {
-    vscode: { copy: `code ${vscCli}`, link: `vscode:mcp/install?${encodeURIComponent(vsc)}`, linkLabel: 'Install in VS Code', note },
-    'vscode-insiders': {
-      copy: `code-insiders ${vscCli}`,
-      link: `vscode-insiders:mcp/install?${encodeURIComponent(vsc)}`,
-      linkLabel: 'Install in VS Code Insiders',
-      note,
-    },
-    cursor: { copy: mcpJson, link: cursorLink, linkLabel: 'Install in Cursor', note: join('Copy gives an mcp.json snippet.', note) },
-    'claude-code': {
-      copy: claudeCmd,
-      link: `claude-cli://open?q=${encodeURIComponent(claudePrompt)}`,
-      linkLabel: 'Open in Claude Code',
-      note: join('"Open" starts a Claude Code session with the prompt pre-filled (not sent); needs Claude Code used once on this machine.', note),
-    },
-    'claude-ai': claudeAi,
-    'claude-desktop': {
-      copy: JSON.stringify({ mcpServers: { [name]: desktopEntry } }, null, 2),
-      note: join(
-        'Merge into claude_desktop_config.json (Settings > Developer > Edit Config), then restart.',
-        spec.kind === 'remote' ? 'Remote servers are bridged via mcp-remote; the claude.ai connector is preferred.' : undefined,
-        note,
-      ),
-    },
-    gemini: { copy: geminiCommand(name, spec), note },
-    codex: { copy: codexCommand(name, spec), note },
+  const build = (id: string, scope: Scope): Omit<InstallOption, 'id' | 'label' | 'scopes' | 'scope'> => {
+    const note = credNote(scope)
+    switch (id) {
+      case 'vscode':
+      case 'vscode-insiders': {
+        const bin = id === 'vscode' ? 'code' : 'code-insiders'
+        const proto = id === 'vscode' ? 'vscode' : 'vscode-insiders'
+        const label = id === 'vscode' ? 'VS Code' : 'VS Code Insiders'
+        if (scope === 'project') {
+          return { copy: vscWorkspace, target: '.vscode/mcp.json in your workspace', note: join('Create or merge into this file.', note) }
+        }
+        return {
+          copy: `${bin} ${vscCli}`,
+          link: `${proto}:mcp/install?${encodeURIComponent(vscJson)}`,
+          linkLabel: `Install in ${label}`,
+          target: `${label} user profile (all workspaces)`,
+          note,
+        }
+      }
+      case 'cursor':
+        return scope === 'project'
+          ? { copy: mcpJson, target: '.cursor/mcp.json in your project', note: join('Create or merge into this file.', note) }
+          : { copy: mcpJson, link: cursorLink, linkLabel: 'Install in Cursor', target: '~/.cursor/mcp.json (all projects)', note: join('Copy gives an mcp.json snippet.', note) }
+      case 'claude-code': {
+        const cmd = claudeCodeCommand(name, spec, scope)
+        const target = { local: '~/.claude.json, this project only', project: '.mcp.json in the project root (shared via git)', user: '~/.claude.json (all projects)' }[scope]
+        return {
+          copy: cmd,
+          link: `claude-cli://open?q=${encodeURIComponent(`Add this MCP server to my Claude Code setup by running: ${cmd}`)}`,
+          linkLabel: 'Open in Claude Code',
+          target,
+          note: join('"Open" starts a Claude Code session with the prompt pre-filled (not sent); needs Claude Code used once on this machine.', note),
+        }
+      }
+      case 'claude-ai':
+        return spec.kind === 'remote'
+          ? {
+              copy: spec.url,
+              link: `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=${encodeURIComponent(name)}&connectorUrl=${encodeURIComponent(spec.url)}`,
+              linkLabel: 'Add to Claude',
+              target: 'your Claude account',
+              note: 'Opens claude.ai Add custom connector. Prefill is unofficial - if fields are empty, paste the copied URL.',
+            }
+          : { unavailable: 'Connectors need a remote (URL) server; this one runs locally. Use Claude Code or Claude Desktop (config).' }
+      case 'claude-desktop':
+        return {
+          copy: JSON.stringify({ mcpServers: { [name]: desktopEntry } }, null, 2),
+          target: 'claude_desktop_config.json (Settings > Developer > Edit Config)',
+          note: join(
+            'Merge into the file, then restart Claude Desktop.',
+            spec.kind === 'remote' ? 'Remote servers are bridged via mcp-remote; the claude.ai connector is preferred.' : undefined,
+            note,
+          ),
+        }
+      case 'gemini':
+        return {
+          copy: geminiCommand(name, spec, scope),
+          target: scope === 'project' ? '.gemini/settings.json in the project' : '~/.gemini/settings.json (all projects)',
+          note,
+        }
+      default: // codex
+        return scope === 'project'
+          ? { copy: codexToml(name, spec), target: '.codex/config.toml in the project (trusted projects only)', note: join('Create or merge into this file.', note) }
+          : { copy: codexCommand(name, spec), target: '~/.codex/config.toml (all projects)', note }
+    }
   }
-  return CLIENTS.map(([id, label]) => ({ ...byId[id], id, label }))
+
+  return CLIENTS.map(([id, label, scopes]) => {
+    const scope = effectiveScope(scopes, requested)
+    return { id, label, scopes, scope, ...build(id, scope) }
+  })
 }

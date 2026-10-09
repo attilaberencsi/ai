@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installOptions, launchSpec, shellQuote, shortName } from './install'
+import { codexToml, installOptions, launchSpec, shellQuote, shortName, type Scope } from './install'
 import type { ServerDetail } from './types'
 
 const remote: ServerDetail = {
@@ -22,7 +22,7 @@ const npm: ServerDetail = {
     },
   ],
 }
-const get = (s: ServerDetail, id: string) => installOptions(s).find((o) => o.id === id)!
+const get = (s: ServerDetail, id: string, scope: Scope = 'user') => installOptions(s, scope).find((o) => o.id === id)!
 
 describe('launchSpec', () => {
   it('prefers remotes and uses placeholders for secret headers', () => {
@@ -44,10 +44,10 @@ describe('launchSpec', () => {
 
 describe('installOptions', () => {
   it('builds a Claude Code command for stdio servers', () => {
-    expect(get(npm, 'claude-code').copy).toBe("claude mcp add local-mcp -e 'API_KEY=<API_KEY>' -- npx -y @example/mcp@2.0.0")
+    expect(get(npm, 'claude-code').copy).toBe("claude mcp add local-mcp --scope user -e 'API_KEY=<API_KEY>' -- npx -y @example/mcp@2.0.0")
   })
   it('builds a Claude Code command for remote servers', () => {
-    expect(get(remote, 'claude-code').copy).toBe("claude mcp add --transport http hosted-mcp https://mcp.example.com/mcp --header 'Authorization: <AUTHORIZATION>'")
+    expect(get(remote, 'claude-code').copy).toBe("claude mcp add --transport http --scope user hosted-mcp https://mcp.example.com/mcp --header 'Authorization: <AUTHORIZATION>'")
   })
   it('builds a VS Code deep link carrying URL-encoded JSON with the name', () => {
     const link = get(remote, 'vscode').link!
@@ -81,6 +81,45 @@ describe('installOptions', () => {
   it('marks every client unavailable when nothing is installable', () => {
     const opts = installOptions({ name: 'a/b', description: 'd', version: '1' })
     expect(opts.every((o) => o.unavailable)).toBe(true)
+  })
+})
+
+describe('scopes', () => {
+  it('Claude Code supports local, project and user; local is the default and omits the flag', () => {
+    expect(get(npm, 'claude-code').scopes).toEqual(['local', 'project', 'user'])
+    expect(get(remote, 'claude-code', 'local').copy).toBe("claude mcp add --transport http hosted-mcp https://mcp.example.com/mcp --header 'Authorization: <AUTHORIZATION>'")
+    expect(get(remote, 'claude-code', 'project').copy).toContain('--scope project')
+    expect(get(remote, 'claude-code', 'project').target).toContain('.mcp.json')
+  })
+  it('falls back to user scope for clients without the requested scope', () => {
+    const o = get(npm, 'vscode', 'local')
+    expect(o.scope).toBe('user')
+    expect(get(npm, 'claude-desktop', 'project').scope).toBe('user')
+  })
+  it('VS Code project scope yields a .vscode/mcp.json snippet without a deep link', () => {
+    const o = get(remote, 'vscode', 'project')
+    expect(o.link).toBeUndefined()
+    expect(JSON.parse(o.copy!)).toEqual({
+      servers: { 'hosted-mcp': { type: 'http', url: 'https://mcp.example.com/mcp', headers: { Authorization: '<AUTHORIZATION>' } } },
+    })
+    expect(o.note).toContain('never put real secrets')
+  })
+  it('Cursor project scope yields an mcp.json snippet; user scope keeps the deep link', () => {
+    expect(get(npm, 'cursor', 'project').link).toBeUndefined()
+    expect(get(npm, 'cursor', 'project').target).toContain('.cursor/mcp.json')
+    expect(get(npm, 'cursor', 'user').link).toContain('cursor://')
+  })
+  it('Gemini always passes an explicit scope', () => {
+    expect(get(remote, 'gemini', 'project').copy).toContain('--scope project')
+    expect(get(npm, 'gemini', 'user').copy).toBe("gemini mcp add --scope user -e 'API_KEY=<API_KEY>' local-mcp npx -y @example/mcp@2.0.0")
+  })
+  it('Codex project scope produces TOML for .codex/config.toml', () => {
+    const o = get(npm, 'codex', 'project')
+    expect(o.copy).toBe(codexToml('local-mcp', launchSpec(npm)!))
+    expect(o.copy).toContain('[mcp_servers.local-mcp]')
+    expect(o.copy).toContain('command = "npx"')
+    expect(o.copy).toContain('[mcp_servers.local-mcp.env]')
+    expect(codexToml('hosted-mcp', launchSpec(remote)!)).toBe('[mcp_servers.hosted-mcp]\nurl = "https://mcp.example.com/mcp"\n')
   })
 })
 
