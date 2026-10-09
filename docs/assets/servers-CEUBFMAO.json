@@ -1,0 +1,340 @@
+{
+  "servers": [
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.github/github-mcp-server",
+        "description": "Connect AI assistants to GitHub - manage repos, issues, PRs, and workflows through natural language.",
+        "title": "GitHub",
+        "repository": {
+          "url": "https://github.com/github/github-mcp-server",
+          "source": "github"
+        },
+        "version": "2.0.2",
+        "packages": [
+          {
+            "registryType": "oci",
+            "identifier": "ghcr.io/github/github-mcp-server:2.0.2",
+            "transport": {
+              "type": "stdio"
+            },
+            "runtimeArguments": [
+              {
+                "description": "Publish the OAuth callback port to loopback so the in-container login callback is reachable",
+                "value": "127.0.0.1:8085:8085",
+                "type": "named",
+                "name": "-p"
+              },
+              {
+                "description": "Fixed OAuth callback port, matching the published port above",
+                "value": "GITHUB_OAUTH_CALLBACK_PORT=8085",
+                "type": "named",
+                "name": "-e"
+              },
+              {
+                "description": "Optional GitHub Personal Access Token. Omit to log in with OAuth on first use.",
+                "value": "GITHUB_PERSONAL_ACCESS_TOKEN={token}",
+                "variables": {
+                  "token": {
+                    "format": "string",
+                    "isSecret": true
+                  }
+                },
+                "type": "named",
+                "name": "-e"
+              }
+            ]
+          }
+        ],
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "headers": [
+              {
+                "description": "Authorization header with authentication token (PAT or App token)",
+                "isSecret": true,
+                "name": "Authorization"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Developer Tools",
+          "tags": [
+            "git",
+            "issues",
+            "pull-requests"
+          ],
+          "icon": "github"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.microsoft/playwright-mcp",
+        "description": "Playwright Tools for MCP",
+        "repository": {
+          "url": "https://github.com/microsoft/playwright-mcp",
+          "source": "github"
+        },
+        "version": "0.0.82",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@playwright/mcp",
+            "version": "0.0.82",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Developer Tools",
+          "tags": [
+            "browser",
+            "testing",
+            "automation"
+          ],
+          "icon": "browser"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.upstash/context7",
+        "description": "Up-to-date code docs for any prompt",
+        "title": "Context7",
+        "repository": {
+          "url": "https://github.com/upstash/context7",
+          "source": "github"
+        },
+        "version": "4.3.0",
+        "websiteUrl": "https://context7.com",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@upstash/context7-mcp",
+            "version": "4.3.0",
+            "transport": {
+              "type": "stdio"
+            },
+            "environmentVariables": [
+              {
+                "description": "API key for authentication",
+                "isSecret": true,
+                "name": "CONTEXT7_API_KEY"
+              }
+            ]
+          },
+          {
+            "registryType": "mcpb",
+            "identifier": "https://github.com/upstash/context7/releases/download/mcpb-v4.3.0/context7.mcpb",
+            "version": "4.3.0",
+            "fileSha256": "e351823c6267237d424c36833295fcc3be38e40277036d83f1da168b24e26d0e",
+            "transport": {
+              "type": "stdio"
+            },
+            "environmentVariables": [
+              {
+                "description": "API key for authentication",
+                "isSecret": true,
+                "name": "CONTEXT7_API_KEY"
+              }
+            ]
+          }
+        ],
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.context7.com/mcp",
+            "headers": [
+              {
+                "description": "API key for authentication. Accepts \"Bearer <key>\" or the raw key.",
+                "isSecret": true,
+                "name": "Authorization"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Documentation",
+          "tags": [
+            "docs",
+            "libraries",
+            "code"
+          ],
+          "icon": "book"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.getsentry/sentry-mcp",
+        "description": "MCP server for Sentry - error monitoring, issue tracking, and debugging for AI assistants",
+        "repository": {
+          "url": "https://github.com/getsentry/sentry-mcp",
+          "source": "github",
+          "subfolder": "packages/mcp-server"
+        },
+        "version": "0.42.0",
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@sentry/mcp-server",
+            "version": "0.42.0",
+            "transport": {
+              "type": "stdio"
+            },
+            "environmentVariables": [
+              {
+                "description": "Your Sentry user authentication token",
+                "isRequired": true,
+                "format": "string",
+                "isSecret": true,
+                "name": "SENTRY_ACCESS_TOKEN"
+              }
+            ]
+          }
+        ],
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.sentry.dev/mcp"
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Monitoring",
+          "tags": [
+            "errors",
+            "debugging",
+            "observability"
+          ],
+          "icon": "alert"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "app.linear/linear",
+        "description": "MCP server for Linear project management and issue tracking",
+        "title": "Linear",
+        "version": "1.0.1",
+        "websiteUrl": "https://linear.app",
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.linear.app/mcp"
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Productivity",
+          "tags": [
+            "issues",
+            "project-management"
+          ],
+          "icon": "tasks"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+        "name": "com.notion/mcp",
+        "description": "Official Notion MCP server",
+        "version": "1.0.1",
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.notion.com/mcp"
+          },
+          {
+            "type": "sse",
+            "url": "https://mcp.notion.com/sse"
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Productivity",
+          "tags": [
+            "notes",
+            "wiki"
+          ],
+          "icon": "note"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+        "name": "com.figma.mcp/mcp",
+        "description": "The Figma MCP server brings Figma design context directly into your AI workflow.",
+        "title": "Figma MCP Server",
+        "repository": {
+          "url": "https://github.com/figma/mcp-server-guide",
+          "source": "github"
+        },
+        "version": "1.0.3",
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.figma.com/mcp"
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Design",
+          "tags": [
+            "design",
+            "ui"
+          ],
+          "icon": "palette"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+        "name": "com.stripe/mcp",
+        "description": "MCP server integrating with Stripe - tools for customers, products, payments, and more.",
+        "repository": {
+          "url": "https://github.com/stripe/agent-toolkit",
+          "source": "github"
+        },
+        "version": "0.2.4",
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "https://mcp.stripe.com"
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Business",
+          "tags": [
+            "payments",
+            "api"
+          ],
+          "icon": "card"
+        }
+      }
+    }
+  ]
+}

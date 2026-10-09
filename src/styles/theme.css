@@ -1,0 +1,77 @@
+:root {
+  --bg: #05060f;
+  --bg-2: #0b0e1f;
+  --panel: rgba(255, 255, 255, 0.04);
+  --panel-strong: rgba(255, 255, 255, 0.08);
+  --border: rgba(140, 160, 255, 0.18);
+  --text: #e8ebff;
+  --muted: #8d95c4;
+  --cyan: #38e8ff;
+  --violet: #9b6bff;
+  --pink: #ff4fd8;
+  --ok: #4dffa6;
+  --radius: 16px;
+  --glow: 0 0 24px rgba(56, 232, 255, 0.25), 0 0 60px rgba(155, 107, 255, 0.15);
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 15% -10%, rgba(155, 107, 255, 0.28), transparent 60%),
+    radial-gradient(800px 500px at 90% 0%, rgba(56, 232, 255, 0.2), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* faint animated grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(140, 160, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 160, 255, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 20%, #000 20%, transparent 75%);
+  animation: drift 24s linear infinite;
+}
+@keyframes drift { to { background-position: 48px 48px; } }
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 6px; }
+
+.wrap { width: min(1180px, 100% - 2rem); margin-inline: auto; }
+
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 0;
+}
+.brand { font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.9rem; color: var(--text); }
+.brand span { color: var(--cyan); text-shadow: 0 0 12px var(--cyan); }
+.brand:hover { text-decoration: none; }
+.nav { display: flex; gap: 1.25rem; font-size: 0.9rem; }
+.nav a { color: var(--muted); }
+.nav a[aria-current='page'], .nav a:hover { color: var(--text); text-decoration: none; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.55rem 0.95rem; border-radius: 10px; font: inherit; font-size: 0.85rem; font-weight: 600;
+  color: var(--text); background: var(--panel-strong); border: 1px solid var(--border);
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+}
+.btn:hover:not(:disabled) { border-color: var(--cyan); box-shadow: var(--glow); text-decoration: none; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: linear-gradient(135deg, rgba(56, 232, 255, 0.25), rgba(155, 107, 255, 0.3)); border-color: rgba(56, 232, 255, 0.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

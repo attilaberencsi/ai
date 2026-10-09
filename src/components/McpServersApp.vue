@@ -1,0 +1,83 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import registryUrl from '../../registry/servers.json?url'
+import { categoriesOf, inCategory, loadRegistry } from '../lib/registry'
+import type { ServerEntry } from '../lib/types'
+import ServerCard from './ServerCard.vue'
+
+const ALL = 'All'
+const servers = ref<ServerEntry[]>([])
+const status = ref<'loading' | 'ready' | 'error'>('loading')
+const error = ref('')
+const active = ref(ALL)
+
+const categories = computed(() => [ALL, ...categoriesOf(servers.value)])
+const visible = computed(() => inCategory(servers.value, active.value === ALL ? null : active.value))
+const count = (c: string) => inCategory(servers.value, c === ALL ? null : c).length
+
+function readHash() {
+  const c = decodeURIComponent(location.hash.replace(/^#/, ''))
+  active.value = categories.value.includes(c) ? c : ALL
+}
+function select(c: string) {
+  active.value = c
+  history.replaceState(null, '', c === ALL ? location.pathname : `#${encodeURIComponent(c)}`)
+}
+function onKey(e: KeyboardEvent, i: number) {
+  const n = categories.value.length
+  const next = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i + n - 1) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1
+  if (next < 0) return
+  e.preventDefault()
+  select(categories.value[next])
+  document.getElementById(`tab-${next}`)?.focus()
+}
+
+onMounted(async () => {
+  window.addEventListener('hashchange', readHash)
+  try {
+    servers.value = (await loadRegistry(registryUrl)).servers
+    status.value = 'ready'
+    readHash()
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e)
+    status.value = 'error'
+  }
+})
+onUnmounted(() => window.removeEventListener('hashchange', readHash))
+</script>
+
+<template>
+  <main>
+    <section class="page-head">
+      <h1>MCP <span class="grad">Servers</span></h1>
+      <p>Pick a category, then install a server into your editor or AI client.</p>
+    </section>
+
+    <p v-if="status === 'loading'" class="state" role="status">Loading servers…</p>
+    <p v-else-if="status === 'error'" class="state error" role="alert">Could not load the registry: {{ error }}</p>
+
+    <template v-else>
+      <div class="tabs" role="tablist" aria-label="Categories">
+        <button
+          v-for="(c, i) in categories"
+          :id="`tab-${i}`"
+          :key="c"
+          role="tab"
+          class="tab"
+          :aria-selected="c === active"
+          :aria-controls="'panel'"
+          :tabindex="c === active ? 0 : -1"
+          @click="select(c)"
+          @keydown="onKey($event, i)"
+        >
+          {{ c }} <span class="count">{{ count(c) }}</span>
+        </button>
+      </div>
+
+      <div id="panel" role="tabpanel" class="grid">
+        <ServerCard v-for="e in visible" :key="`${e.server.name}@${e.server.version}`" :entry="e" />
+        <p v-if="!visible.length" class="state">No servers in this category yet.</p>
+      </div>
+    </template>
+  </main>
+</template>

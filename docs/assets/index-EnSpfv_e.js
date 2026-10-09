@@ -1,0 +1,1 @@
+import"./theme-XTfPt2Dv.js";window.matchMedia(`(prefers-reduced-motion: reduce)`).matches||document.querySelectorAll(`.card:not(.disabled)`).forEach(e=>{e.addEventListener(`pointermove`,t=>{let n=e.getBoundingClientRect();e.style.setProperty(`--mx`,`${t.clientX-n.left}px`),e.style.setProperty(`--my`,`${t.clientY-n.top}px`)})});
