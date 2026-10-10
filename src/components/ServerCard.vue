@@ -59,7 +59,7 @@ async function copy(text: string) {
       <li v-for="t in meta.tags ?? []" :key="t" class="chip">{{ t }}</li>
     </ul>
 
-    <ul v-if="meta.notes?.length" class="setup" aria-label="Setup notes">
+    <ul v-if="meta.notes?.length" class="setup" aria-label="Setup notes" tabindex="0">
       <li v-for="n in meta.notes" :key="n">{{ n }}</li>
     </ul>
 
