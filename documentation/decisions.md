@@ -42,3 +42,9 @@ Where a client has no CLI/deep-link for a scope (VS Code workspace, Cursor proje
 
 ## 2026-10-10 - Themes via CSS variables, green default
 Default green "leaf" theme is the `:root` styling, so it is also the fallback when no theme can be applied. Other themes (neon = the original look, ocean, ember) override variables with `[data-theme]` on `<html>`; choice stored in localStorage (`ai-library-theme`), applied by a tiny inline script in each page head.
+
+## 2026-10-10 - Registry content = the owner's own validated servers; optional inputs and notes
+`registry/servers.json` now holds only servers the owner uses and has validated (sample data removed). Entries mirror the owner's VS Code config; names follow the official registry where listed, otherwise `io.github.<owner>/<repo>`.
+- Install commands include only required (or fixed-value) env vars/headers; optional ones are listed in a note instead.
+- `_meta[io.github.attilaberencsi/catalog].notes` (string[]) carries setup prerequisites shown on the card (add-ons, tokens, limits).
+- The official schema limits `description` to 100 characters; keep long text in `notes`.

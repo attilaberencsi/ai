@@ -1,0 +1,380 @@
+{
+  "servers": [
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "com.postman/postman-mcp-server",
+        "title": "Postman MCP Server",
+        "description": "Trusted AI access to the Postman platform: collections, API specs and environments.",
+        "version": "2.13.0",
+        "websiteUrl": "https://www.postman.com/product/mcp-server/",
+        "repository": {
+          "url": "https://github.com/postmanlabs/postman-mcp-server",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@postman/postman-mcp-server",
+            "transport": {
+              "type": "stdio"
+            },
+            "environmentVariables": [
+              {
+                "name": "POSTMAN_API_KEY",
+                "description": "A valid Postman API key (create one in your Postman account settings).",
+                "isRequired": true,
+                "isSecret": true
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "API Development",
+          "tags": [
+            "api",
+            "testing",
+            "collections"
+          ],
+          "icon": "api",
+          "notes": [
+            "Requires a Postman API key."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.UI5/mcp-server",
+        "title": "UI5 MCP Server",
+        "description": "MCP server for SAPUI5/OpenUI5 development.",
+        "version": "0.1.3",
+        "repository": {
+          "url": "https://github.com/UI5/mcp-server",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@ui5/mcp-server",
+            "transport": {
+              "type": "stdio"
+            },
+            "version": "0.1.3",
+            "environmentVariables": [
+              {
+                "name": "UI5_MCP_SERVER_ALLOWED_DOMAINS",
+                "description": "Comma-separated list of domains the tools may access. Empty string allows any domain; prefix with a dot for wildcard subdomains (.example.com).",
+                "default": "localhost, services.odata.org",
+                "format": "string"
+              },
+              {
+                "name": "UI5_DATA_DIR",
+                "description": "Directory where the server stores its data, e.g. cached API references. Defaults to the .ui5 directory in your home folder.",
+                "format": "string"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "SAP Development",
+          "tags": [
+            "sap",
+            "ui5",
+            "frontend"
+          ],
+          "icon": "ui",
+          "notes": [
+            "Pinned to 0.1.3, the version used and validated; newer releases exist."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.SAP/fiori-mcp-server",
+        "title": "SAP Fiori tools MCP Server",
+        "description": "Generate and modify SAP Fiori applications with SAP Fiori tools.",
+        "version": "1.15.9",
+        "repository": {
+          "url": "https://github.com/SAP/open-ux-tools",
+          "source": "github",
+          "subfolder": "packages/fiori-mcp-server"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@sap-ux/fiori-mcp-server",
+            "transport": {
+              "type": "stdio"
+            },
+            "packageArguments": [
+              {
+                "type": "positional",
+                "value": "fiori-mcp",
+                "valueHint": "command"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "SAP Development",
+          "tags": [
+            "sap",
+            "fiori",
+            "frontend"
+          ],
+          "icon": "ui",
+          "notes": [
+            "Long operations can be slow: in VS Code add \"timeout\": 600 to the server entry."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.cap-js/mcp-server",
+        "title": "CAP (CDS) MCP Server",
+        "description": "AI-assisted development of SAP Cloud Application Programming Model (CAP) apps.",
+        "version": "0.0.7",
+        "websiteUrl": "https://cap.cloud.sap/",
+        "repository": {
+          "url": "https://github.com/cap-js/mcp-server",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@cap-js/mcp-server",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "SAP Development",
+          "tags": [
+            "sap",
+            "cap",
+            "cds"
+          ],
+          "icon": "database"
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.ahujasid/mcp-for-blender",
+        "title": "Blender MCP",
+        "description": "Control Blender from your AI client: scenes, objects, materials and Python (formerly blender-mcp).",
+        "version": "2.1.9",
+        "repository": {
+          "url": "https://github.com/ahujasid/mcp-for-blender",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "pypi",
+            "identifier": "mcp-for-blender",
+            "transport": {
+              "type": "stdio"
+            },
+            "environmentVariables": [
+              {
+                "name": "BLENDER_HOST",
+                "description": "Host running the Blender add-on.",
+                "default": "localhost",
+                "format": "string"
+              },
+              {
+                "name": "BLENDER_PORT",
+                "description": "Port of the Blender add-on socket.",
+                "default": "9876",
+                "format": "number"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "3D & CAD",
+          "tags": [
+            "blender",
+            "3d",
+            "modeling"
+          ],
+          "icon": "cube",
+          "notes": [
+            "Needs the Blender add-on: run `uvx mcp-for-blender install-addon`, enable it in Preferences > Add-ons, then start the server from the 3D viewport sidebar (N > MCP for Blender).",
+            "The add-on socket has no authentication: keep it on localhost.",
+            "Requires Blender 3.0+ and uv."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.neka-nat/freecad-mcp",
+        "title": "FreeCAD MCP",
+        "description": "Control FreeCAD from your AI client: edit models, run Python scripts and FEM analyses.",
+        "version": "0.1.26",
+        "repository": {
+          "url": "https://github.com/neka-nat/freecad-mcp",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "pypi",
+            "identifier": "freecad-mcp",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "3D & CAD",
+          "tags": [
+            "freecad",
+            "cad",
+            "fem"
+          ],
+          "icon": "cube",
+          "notes": [
+            "Needs the FreeCAD add-on (addon/FreeCADMCP from the repository) installed; open FreeCAD, select the MCP Addon workbench and click Start RPC Server.",
+            "Requires Python 3.12+ and uv. Optional flags: --host <ip> for a remote FreeCAD, --only-text-feedback to save tokens."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.n8n-io/n8n",
+        "title": "n8n (instance MCP)",
+        "description": "Let AI clients find and run the workflows of your n8n instance (built-in instance MCP).",
+        "version": "1.0.0",
+        "websiteUrl": "https://docs.n8n.io/advanced-ai/mcp/accessing-n8n-mcp-server/",
+        "repository": {
+          "url": "https://github.com/n8n-io/n8n",
+          "source": "github"
+        },
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "http://localhost:5678/mcp-server/http",
+            "headers": [
+              {
+                "name": "Authorization",
+                "description": "Bearer <MCP access token>, from n8n Settings > Instance-level MCP. Not needed if your client authorizes through OAuth.",
+                "isSecret": true
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Automation",
+          "tags": [
+            "n8n",
+            "workflows",
+            "automation"
+          ],
+          "icon": "flow",
+          "notes": [
+            "Enable Instance-level MCP in your n8n settings first, and replace localhost:5678 with your n8n URL.",
+            "Authenticate with OAuth (recommended) or an MCP access token - this is not the same as an n8n API key."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.zhsama/duckduckgo-mcp-server",
+        "title": "DuckDuckGo Search",
+        "description": "Web search through DuckDuckGo with Markdown results.",
+        "version": "0.1.2",
+        "repository": {
+          "url": "https://github.com/zhsama/duckduckgo-mcp-server",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "duckduckgo-mcp-server",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Search",
+          "tags": [
+            "search",
+            "web"
+          ],
+          "icon": "search",
+          "notes": [
+            "Rate limits: 1 request per second, 15,000 per month. No API key needed."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.jgraph/drawio-mcp",
+        "title": "draw.io MCP",
+        "description": "Official draw.io MCP server: create diagrams and open them in the draw.io editor.",
+        "version": "1.6.3",
+        "websiteUrl": "https://www.draw.io",
+        "repository": {
+          "url": "https://github.com/jgraph/drawio-mcp",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@drawio/mcp",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Diagrams",
+          "tags": [
+            "diagrams",
+            "drawio",
+            "mermaid"
+          ],
+          "icon": "diagram",
+          "notes": [
+            "A hosted variant that renders diagrams inline in chat is available at https://mcp.draw.io/mcp."
+          ]
+        }
+      }
+    }
+  ]
+}

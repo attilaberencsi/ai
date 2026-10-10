@@ -2,8 +2,8 @@ import type { Argument, KeyValueInput, Package, Remote, ServerDetail } from './t
 
 /** Normalized way to launch/connect a server, independent of any client. */
 export type LaunchSpec =
-  | { kind: 'stdio'; command: string; args: string[]; env: Record<string, string> }
-  | { kind: 'remote'; transport: 'http' | 'sse'; url: string; headers: Record<string, string> }
+  | { kind: 'stdio'; command: string; args: string[]; env: Record<string, string>; optional: string[] }
+  | { kind: 'remote'; transport: 'http' | 'sse'; url: string; headers: Record<string, string>; optional: string[] }
 
 /** user = all your projects; project = shared via the repo; local = this project only, private (Claude Code). */
 export type Scope = 'user' | 'project' | 'local'
@@ -56,6 +56,13 @@ function inputValue(i: KeyValueInput): string {
   return i.value ?? i.default ?? placeholder(i.name)
 }
 
+/** Required inputs (and ones with a fixed value) go into the command; the rest are only listed in a note. */
+function splitInputs(inputs: KeyValueInput[] = []) {
+  const used = inputs.filter((i) => i.isRequired || i.value !== undefined)
+  const optional = inputs.filter((i) => !used.includes(i)).map((i) => i.name)
+  return { values: Object.fromEntries(used.map((i) => [i.name, inputValue(i)])), optional }
+}
+
 function argTokens(args: Argument[] = []): string[] {
   return args.flatMap((a) => {
     const v = a.value ?? a.default
@@ -68,22 +75,22 @@ function argTokens(args: Argument[] = []): string[] {
 }
 
 function packageSpec(p: Package): LaunchSpec | null {
-  const env = Object.fromEntries((p.environmentVariables ?? []).map((e) => [e.name, inputValue(e)]))
+  const { values: env, optional } = splitInputs(p.environmentVariables)
   const runtime = argTokens(p.runtimeArguments)
   const pkgArgs = argTokens(p.packageArguments)
   switch (p.registryType) {
     case 'npm': {
       const id = p.version ? `${p.identifier}@${p.version}` : p.identifier
-      return { kind: 'stdio', command: p.runtimeHint ?? 'npx', args: ['-y', ...runtime, id, ...pkgArgs], env }
+      return { kind: 'stdio', command: p.runtimeHint ?? 'npx', args: ['-y', ...runtime, id, ...pkgArgs], env, optional }
     }
     case 'pypi': {
       const id = p.version ? `${p.identifier}==${p.version}` : p.identifier
-      return { kind: 'stdio', command: p.runtimeHint ?? 'uvx', args: [...runtime, id, ...pkgArgs], env }
+      return { kind: 'stdio', command: p.runtimeHint ?? 'uvx', args: [...runtime, id, ...pkgArgs], env, optional }
     }
     case 'oci': {
       const image = p.version && !p.identifier.includes(':') ? `${p.identifier}:${p.version}` : p.identifier
       const envFlags = Object.keys(env).flatMap((k) => ['-e', k])
-      return { kind: 'stdio', command: 'docker', args: ['run', '-i', '--rm', ...envFlags, ...runtime, image, ...pkgArgs], env }
+      return { kind: 'stdio', command: 'docker', args: ['run', '-i', '--rm', ...envFlags, ...runtime, image, ...pkgArgs], env, optional }
     }
     default:
       return null
@@ -91,8 +98,8 @@ function packageSpec(p: Package): LaunchSpec | null {
 }
 
 function remoteSpec(r: Remote): LaunchSpec {
-  const headers = Object.fromEntries((r.headers ?? []).map((h) => [h.name, inputValue(h)]))
-  return { kind: 'remote', transport: r.type === 'sse' ? 'sse' : 'http', url: r.url, headers }
+  const { values: headers, optional } = splitInputs(r.headers)
+  return { kind: 'remote', transport: r.type === 'sse' ? 'sse' : 'http', url: r.url, headers, optional }
 }
 
 /** Prefer a hosted remote (no local runtime needed), else the first supported package. */
@@ -106,10 +113,15 @@ export function launchSpec(server: ServerDetail): LaunchSpec | null {
   return null
 }
 
+const GENERIC_NAMES = new Set(['mcp', 'server', 'mcp-server', 'mcp_server'])
+
 /** Short CLI-safe name from the reverse-DNS registry name, e.g. io.github.x/foo-mcp -> foo-mcp. */
 export function shortName(server: ServerDetail): string {
-  const last = server.name.split('/').pop() ?? server.name
-  return last.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'mcp-server'
+  const [namespace, last = namespace] = server.name.split('/')
+  // Generic names (e.g. "mcp-server") would clash across servers, so prefix them with the owner.
+  const owner = namespace.split('.').pop() ?? ''
+  const base = GENERIC_NAMES.has(last.toLowerCase()) && owner ? `${owner.toLowerCase()}-${last}` : last
+  return base.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'mcp-server'
 }
 
 /** POSIX single-quote unless the token is plainly safe. Placeholders like <TOKEN> get quoted. */
@@ -190,8 +202,14 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
   const name = shortName(server)
   const needsCreds = spec.kind === 'stdio' ? hasEntries(spec.env) : hasEntries(spec.headers)
   const join = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(' ') || undefined
+  const optionalNote = spec.optional.length
+    ? `Optional ${spec.kind === 'remote' ? 'headers' : 'environment variables'} not included: ${spec.optional.join(', ')}.`
+    : undefined
   const credNote = (scope: Scope) =>
-    !needsCreds ? undefined : scope === 'project' ? `${PLACEHOLDER_NOTE} This file is committed to your repo: never put real secrets in it.` : PLACEHOLDER_NOTE
+    join(
+      !needsCreds ? undefined : scope === 'project' ? `${PLACEHOLDER_NOTE} This file is committed to your repo: never put real secrets in it.` : PLACEHOLDER_NOTE,
+      optionalNote,
+    )
 
   const entry = vscodeEntry(spec)
   const vscJson = JSON.stringify({ name, ...entry })

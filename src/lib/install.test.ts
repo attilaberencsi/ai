@@ -6,7 +6,7 @@ const remote: ServerDetail = {
   name: 'io.github.example/hosted-mcp',
   description: 'd',
   version: '1.0.0',
-  remotes: [{ type: 'streamable-http', url: 'https://mcp.example.com/mcp', headers: [{ name: 'Authorization', isSecret: true }] }],
+  remotes: [{ type: 'streamable-http', url: 'https://mcp.example.com/mcp', headers: [{ name: 'Authorization', isSecret: true, isRequired: true }] }],
 }
 const npm: ServerDetail = {
   name: 'io.github.example/local-mcp',
@@ -18,7 +18,7 @@ const npm: ServerDetail = {
       identifier: '@example/mcp',
       version: '2.0.0',
       transport: { type: 'stdio' },
-      environmentVariables: [{ name: 'API_KEY', isSecret: true }],
+      environmentVariables: [{ name: 'API_KEY', isSecret: true, isRequired: true }],
     },
   ],
 }
@@ -31,10 +31,11 @@ describe('launchSpec', () => {
       transport: 'http',
       url: 'https://mcp.example.com/mcp',
       headers: { Authorization: '<AUTHORIZATION>' },
+      optional: [],
     })
   })
   it('maps npm packages to npx with pinned version and env placeholders', () => {
-    expect(launchSpec(npm)).toEqual({ kind: 'stdio', command: 'npx', args: ['-y', '@example/mcp@2.0.0'], env: { API_KEY: '<API_KEY>' } })
+    expect(launchSpec(npm)).toEqual({ kind: 'stdio', command: 'npx', args: ['-y', '@example/mcp@2.0.0'], env: { API_KEY: '<API_KEY>' }, optional: [] })
   })
   it('returns null for unsupported package types', () => {
     const s = { ...npm, packages: [{ registryType: 'mcpb', identifier: 'x', transport: { type: 'stdio' as const } }] }
@@ -84,6 +85,38 @@ describe('installOptions', () => {
   })
 })
 
+describe('optional inputs', () => {
+  const withOptional: ServerDetail = {
+    name: 'io.github.example/opt-mcp',
+    description: 'd',
+    version: '1.0.0',
+    packages: [
+      {
+        registryType: 'npm',
+        identifier: 'opt-mcp',
+        transport: { type: 'stdio' },
+        environmentVariables: [
+          { name: 'API_KEY', isRequired: true, isSecret: true },
+          { name: 'DATA_DIR' },
+          { name: 'PORT', default: '9876' },
+          { name: 'MODE', value: 'fast' },
+        ],
+      },
+    ],
+  }
+  it('only puts required or fixed-value variables into the command', () => {
+    expect(launchSpec(withOptional)).toMatchObject({ env: { API_KEY: '<API_KEY>', MODE: 'fast' }, optional: ['DATA_DIR', 'PORT'] })
+  })
+  it('lists the omitted optional variables in the note', () => {
+    expect(get(withOptional, 'claude-code').note).toContain('not included: DATA_DIR, PORT')
+  })
+  it('omits optional headers for remotes (e.g. OAuth-capable servers)', () => {
+    const r: ServerDetail = { ...remote, remotes: [{ type: 'streamable-http', url: 'https://x/mcp', headers: [{ name: 'Authorization' }] }] }
+    expect(get(r, 'claude-code').copy).toBe('claude mcp add --transport http --scope user hosted-mcp https://x/mcp')
+    expect(get(r, 'claude-code').note).toContain('headers not included: Authorization')
+  })
+})
+
 describe('scopes', () => {
   it('Claude Code supports local, project and user; local is the default and omits the flag', () => {
     expect(get(npm, 'claude-code').scopes).toEqual(['local', 'project', 'user'])
@@ -126,6 +159,10 @@ describe('scopes', () => {
 describe('helpers', () => {
   it('shortName takes the part after the slash and sanitizes it', () => {
     expect(shortName({ name: 'io.github.x/My Server!', description: '', version: '1' })).toBe('My-Server')
+  })
+  it('shortName prefixes generic names with the owner so they stay unique', () => {
+    expect(shortName({ name: 'io.github.UI5/mcp-server', description: '', version: '1' })).toBe('ui5-mcp-server')
+    expect(shortName({ name: 'io.github.cap-js/mcp-server', description: '', version: '1' })).toBe('cap-js-mcp-server')
   })
   it('shellQuote escapes single quotes', () => {
     expect(shellQuote("it's")).toBe(`'it'\\''s'`)

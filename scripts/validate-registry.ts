@@ -35,6 +35,9 @@ for (const [i, entry] of (data.servers ?? []).entries()) {
   if (meta?.tags !== undefined && !(Array.isArray(meta.tags) && meta.tags.every((t: unknown) => typeof t === 'string'))) {
     errors.push(`${label}: catalog.tags must be string[]`)
   }
+  if (meta?.notes !== undefined && !(Array.isArray(meta.notes) && meta.notes.every((t: unknown) => typeof t === 'string'))) {
+    errors.push(`${label}: catalog.notes must be string[]`)
+  }
   if (!entry.server?.remotes?.length && !entry.server?.packages?.length) {
     errors.push(`${label}: needs at least one remote or package to be installable`)
   }

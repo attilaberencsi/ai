@@ -47,6 +47,8 @@ export interface CatalogMeta {
   category: string
   tags?: string[]
   icon?: string
+  /** Setup hints shown on the card (prerequisites, add-ons, limits). */
+  notes?: string[]
 }
 export interface ServerEntry {
   server: ServerDetail

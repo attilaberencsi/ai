@@ -50,7 +50,7 @@ onUnmounted(() => window.removeEventListener('hashchange', readHash))
   <main>
     <section class="page-head">
       <h1>MCP <span class="grad">Servers</span></h1>
-      <p>Library contains items used and validated by a human (me)</p>
+      <p>Library contains items used by a human (me). The list grows slowly over time, because here you see validated and tested content only.</p>
     </section>
 
     <p v-if="status === 'loading'" class="state" role="status">Loading servers…</p>

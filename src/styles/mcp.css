@@ -62,3 +62,6 @@
 .actions .btn { flex: 1 1 0; }
 .actions .btn.primary { flex: 2 1 0; }
 .target { margin: 0; font-size: 0.75rem; color: var(--a1); overflow-wrap: anywhere; }
+
+.setup { margin: 0; padding: 0.55rem 0.8rem 0.55rem 1.5rem; font-size: 0.75rem; line-height: 1.45; color: var(--muted); border-left: 2px solid var(--a1); background: var(--panel); border-radius: 0 10px 10px 0; }
+.setup li + li { margin-top: 0.3rem; }

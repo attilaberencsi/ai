@@ -59,6 +59,10 @@ async function copy(text: string) {
       <li v-for="t in meta.tags ?? []" :key="t" class="chip">{{ t }}</li>
     </ul>
 
+    <ul v-if="meta.notes?.length" class="setup" aria-label="Setup notes">
+      <li v-for="n in meta.notes" :key="n">{{ n }}</li>
+    </ul>
+
     <div class="install">
       <label class="sr-only" :for="`target-${server.name}`">Install in</label>
       <select :id="`target-${server.name}`" v-model="selectedKey" class="select">
