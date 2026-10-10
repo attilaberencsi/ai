@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { SCOPE_LABELS, installOptions, launchSpec, type Scope } from '../lib/install'
+import { installTargets, launchSpec } from '../lib/install'
 import { catalogOf } from '../lib/registry'
 import type { ServerEntry } from '../lib/types'
 
@@ -8,14 +8,9 @@ const props = defineProps<{ entry: ServerEntry }>()
 
 const server = computed(() => props.entry.server)
 const meta = computed(() => catalogOf(props.entry))
-const scope = ref<Scope>('user')
-const options = computed(() => installOptions(server.value, scope.value))
-const vscode = computed(() => options.value.find((o) => o.id === 'vscode'))
-const selectedId = ref('claude-code')
-const selected = computed(() => options.value.find((o) => o.id === selectedId.value) ?? options.value[0])
-// Scopes offered in the dropdown: those the selected client supports.
-const scopeChoices = computed(() => selected.value?.scopes ?? [])
-const scopeNotHonored = computed(() => selected.value && selected.value.scope !== scope.value)
+const targets = computed(() => installTargets(server.value))
+const selectedKey = ref('vscode:user')
+const selected = computed(() => targets.value.find((t) => t.key === selectedKey.value) ?? targets.value[0])
 const kind = computed(() => {
   const s = launchSpec(server.value)
   return s ? (s.kind === 'remote' ? 'Remote' : 'Local') : 'n/a'
@@ -65,40 +60,31 @@ async function copy(text: string) {
     </ul>
 
     <div class="install">
-      <a v-if="vscode?.link" class="btn primary" :href="vscode.link">Install in VS Code</a>
-      <button v-else-if="vscode?.copy" class="btn primary" @click="copy(vscode.copy)">Copy .vscode/mcp.json entry</button>
-      <button v-else class="btn primary" disabled :title="vscode?.unavailable">Install in VS Code</button>
+      <label class="sr-only" :for="`target-${server.name}`">Install in</label>
+      <select :id="`target-${server.name}`" v-model="selectedKey" class="select">
+        <option v-for="t in targets" :key="t.key" :value="t.key">{{ t.label }}</option>
+      </select>
 
-      <div class="copy-row">
-        <label class="sr-only" :for="`client-${server.name}`">Install for</label>
-        <select :id="`client-${server.name}`" v-model="selectedId" class="select">
-          <option v-for="o in options" :key="o.id" :value="o.id">{{ o.label }}</option>
-        </select>
-        <button class="btn" :disabled="!selected?.copy" @click="selected?.copy && copy(selected.copy)">
-          {{ copied ? 'Copied ✓' : 'Copy' }}
-        </button>
-        <a v-if="selected?.link && selected.id !== 'vscode'" class="btn" :href="selected.link" :target="selected.link.startsWith('http') ? '_blank' : undefined" rel="noopener">
+      <div v-if="selected && !selected.unavailable" class="actions">
+        <a
+          v-if="selected.link"
+          class="btn primary"
+          :href="selected.link"
+          :target="selected.link.startsWith('http') ? '_blank' : undefined"
+          rel="noopener"
+        >
           {{ selected.linkLabel ?? 'Open' }}
         </a>
+        <button class="btn" :disabled="!selected.copy" @click="selected.copy && copy(selected.copy)">
+          {{ copied ? 'Copied ✓' : 'Copy' }}
+        </button>
       </div>
-
-      <div class="scope-row">
-        <label :for="`scope-${server.name}`">Scope</label>
-        <select :id="`scope-${server.name}`" v-model="scope" class="select" :disabled="scopeChoices.length < 2">
-          <option v-for="s in (['user', 'project', 'local'] as Scope[])" :key="s" :value="s" :disabled="!scopeChoices.includes(s)">
-            {{ SCOPE_LABELS[s] }}
-          </option>
-        </select>
-      </div>
-      <p v-if="selected && !selected.unavailable" class="target">
-        Installs to: {{ selected.target }}
-        <span v-if="scopeNotHonored"> - {{ selected.label }} has no {{ SCOPE_LABELS[scope].split(' ')[0].toLowerCase() }} scope; using {{ selected.scope }}.</span>
-      </p>
 
       <p v-if="selected?.unavailable" class="note warn">{{ selected.unavailable }}</p>
-      <template v-else>
-        <pre v-if="selected?.copy" class="preview" tabindex="0"><code>{{ selected.copy }}</code></pre>
-        <p v-if="selected?.note" class="note">{{ selected.note }}</p>
+      <template v-else-if="selected">
+        <p class="target">Installs to: {{ selected.target }}</p>
+        <pre v-if="selected.copy" class="preview" tabindex="0"><code>{{ selected.copy }}</code></pre>
+        <p v-if="selected.note" class="note">{{ selected.note }}</p>
       </template>
       <span class="sr-only" role="status">{{ copied ? 'Copied to clipboard' : '' }}</span>
     </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { codexToml, installOptions, launchSpec, shellQuote, shortName, type Scope } from './install'
+import { codexToml, installOptions, installTargets, launchSpec, shellQuote, shortName, type Scope } from './install'
 import type { ServerDetail } from './types'
 
 const remote: ServerDetail = {
@@ -130,5 +130,31 @@ describe('helpers', () => {
   it('shellQuote escapes single quotes', () => {
     expect(shellQuote("it's")).toBe(`'it'\\''s'`)
     expect(shellQuote('safe-1.2/x')).toBe('safe-1.2/x')
+  })
+})
+
+describe('Claude Code deep link', () => {
+  it('is offered for user scope only, because the link opens the home folder', () => {
+    expect(get(npm, 'claude-code', 'user').link).toContain('claude-cli://open?q=')
+    expect(get(npm, 'claude-code', 'local').link).toBeUndefined()
+    expect(get(npm, 'claude-code', 'project').link).toBeUndefined()
+  })
+})
+
+describe('installTargets', () => {
+  const targets = installTargets(remote)
+  it('lists one entry per client+scope with unique keys', () => {
+    expect(new Set(targets.map((t) => t.key)).size).toBe(targets.length)
+    expect(targets.map((t) => t.key)).toContain('vscode:user')
+    expect(targets.map((t) => t.key)).toContain('claude-code:local')
+  })
+  it('labels multi-scope clients with their scope and single-scope clients without', () => {
+    expect(targets.find((t) => t.key === 'claude-code:project')!.label).toBe('Claude Code · Project')
+    expect(targets.find((t) => t.key === 'claude-desktop:user')!.label).toBe('Claude Desktop (config)')
+  })
+  it('keeps the deep link next to the copy text for the same target', () => {
+    const t = targets.find((t) => t.key === 'vscode:user')!
+    expect(t.link).toContain('vscode:mcp/install?')
+    expect(t.copy).toContain('code --add-mcp')
   })
 })

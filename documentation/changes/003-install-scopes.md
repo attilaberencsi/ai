@@ -2,7 +2,7 @@
 Status: done (pending manual review)
 
 ## Acceptance criteria
-- [x] Each server card has a Scope selector: User (all projects), Project (shared in repo), Local (this project, private).
+- [x] Each server card has ONE combined "Client · Scope" dropdown (e.g. "Claude Code · Project") with the install button and Copy side by side.
 - [x] Scope-aware output per client; unsupported scopes are disabled for that client and fall back (shown in the card).
 - [x] Claude Code: local (default, no flag) / project (`--scope project` -> .mcp.json) / user (`--scope user`).
 - [x] VS Code (+Insiders): user -> deep link / `--add-mcp`; project -> `.vscode/mcp.json` snippet.

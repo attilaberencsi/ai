@@ -14,8 +14,12 @@ export const SCOPE_LABELS: Record<Scope, string> = {
   local: 'Local (this project, private)',
 }
 
+export const SCOPE_SHORT: Record<Scope, string> = { user: 'User', project: 'Project', local: 'Local' }
+
 export interface InstallOption {
   id: string
+  /** Unique per client+scope; set by installTargets. */
+  key?: string
   label: string
   /** Scopes this client can install into. */
   scopes: Scope[]
@@ -38,7 +42,7 @@ const CLIENTS: [id: string, label: string, scopes: Scope[]][] = [
   ['vscode-insiders', 'VS Code Insiders', ['user', 'project']],
   ['cursor', 'Cursor', ['user', 'project']],
   ['claude-code', 'Claude Code', ['local', 'project', 'user']],
-  ['claude-ai', 'Claude (connector)', ['user']],
+  ['claude-ai', 'Claude Web (connector)', ['user']],
   ['claude-desktop', 'Claude Desktop (config)', ['user']],
   ['gemini', 'Gemini CLI', ['user', 'project']],
   ['codex', 'Codex CLI', ['user', 'project']],
@@ -222,13 +226,25 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
           : { copy: mcpJson, link: cursorLink, linkLabel: 'Install in Cursor', target: '~/.cursor/mcp.json (all projects)', note: join('Copy gives an mcp.json snippet.', note) }
       case 'claude-code': {
         const cmd = claudeCodeCommand(name, spec, scope)
-        const target = { local: '~/.claude.json, this project only', project: '.mcp.json in the project root (shared via git)', user: '~/.claude.json (all projects)' }[scope]
+        const target = { local: '~/.claude.json, stored under the path of the folder you run it in (only that project, private to you)', project: '.mcp.json in the project root (shared via git)', user: '~/.claude.json, top-level (available in all your projects)' }[scope]
+        // The deep link always opens Claude Code in the home folder, so it is only right for user scope:
+        // local/project scope belong to a specific project folder, where the copied command must be run.
+        if (scope !== 'user') {
+          return {
+            copy: cmd,
+            target,
+            note: join('Run this in a terminal inside the project this server is for (the deep link would open your home folder instead).', note),
+          }
+        }
         return {
           copy: cmd,
           link: `claude-cli://open?q=${encodeURIComponent(`Add this MCP server to my Claude Code setup by running: ${cmd}`)}`,
-          linkLabel: 'Open in Claude Code',
+          linkLabel: 'Prefill in Claude Code',
           target,
-          note: join('"Open" starts a Claude Code session with the prompt pre-filled (not sent); needs Claude Code used once on this machine.', note),
+          note: join(
+            'Opens Claude Code in your home folder with the command pre-filled; you must trust that folder on first use, press Enter and approve the command. Or use Copy and run it in any terminal.',
+            note,
+          ),
         }
       }
       case 'claude-ai':
@@ -244,7 +260,7 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
       case 'claude-desktop':
         return {
           copy: JSON.stringify({ mcpServers: { [name]: desktopEntry } }, null, 2),
-          target: 'claude_desktop_config.json (Settings > Developer > Edit Config)',
+          target: 'claude_desktop_config.json (Open Settings > Developer > Edit Config)',
           note: join(
             'Merge into the file, then restart Claude Desktop.',
             spec.kind === 'remote' ? 'Remote servers are bridged via mcp-remote; the claude.ai connector is preferred.' : undefined,
@@ -268,4 +284,14 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
     const scope = effectiveScope(scopes, requested)
     return { id, label, scopes, scope, ...build(id, scope) }
   })
+}
+
+/** One entry per (client, scope) pair, labelled "Client - Scope" for clients with several scopes. */
+export function installTargets(server: ServerDetail): InstallOption[] {
+  return CLIENTS.flatMap(([id, , scopes]) =>
+    scopes.map((scope) => {
+      const o = installOptions(server, scope).find((x) => x.id === id)!
+      return { ...o, key: `${id}:${scope}`, label: scopes.length > 1 ? `${o.label} · ${SCOPE_SHORT[scope]}` : o.label }
+    }),
+  )
 }
