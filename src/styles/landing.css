@@ -1,8 +1,8 @@
 .hero { padding: 6vh 0 3rem; text-align: center; }
-.eyebrow { color: var(--cyan); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; margin: 0 0 1rem; }
+.eyebrow { color: var(--a1); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; margin: 0 0 1rem; }
 .hero h1 { font-size: clamp(2.2rem, 6vw, 4.4rem); line-height: 1.05; margin: 0 0 1.2rem; letter-spacing: -0.02em; }
 .grad {
-  background: linear-gradient(90deg, var(--cyan), var(--violet) 55%, var(--pink));
+  background: linear-gradient(90deg, var(--a1), var(--a2) 55%, var(--a3));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .lead { max-width: 560px; margin: 0 auto; color: var(--muted); font-size: 1.1rem; line-height: 1.6; }
@@ -16,14 +16,14 @@
 }
 .card::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(56, 232, 255, 0.2), transparent 70%);
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(var(--a1-rgb) / 0.2), transparent 70%);
 }
-a.card:hover { text-decoration: none; transform: translateY(-4px); border-color: var(--cyan); box-shadow: var(--glow); }
+a.card:hover { text-decoration: none; transform: translateY(-4px); border-color: var(--a1); box-shadow: var(--glow); }
 a.card:hover::before { opacity: 1; }
 .card-icon { font-size: 2rem; }
 .card h2 { margin: 0.4rem 0 0; font-size: 1.4rem; }
 .card p { margin: 0; color: var(--muted); line-height: 1.5; flex: 1; }
-.card-cta { color: var(--cyan); font-weight: 600; }
+.card-cta { color: var(--a1); font-weight: 600; }
 .card.disabled { opacity: 0.55; }
 .badge {
   align-self: flex-start; padding: 0.2rem 0.65rem; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;

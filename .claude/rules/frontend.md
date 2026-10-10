@@ -12,4 +12,5 @@ paths:
 - Load registry data via fetch from static files; handle loading and error states.
 - Accessibility basics: semantic HTML, keyboard-operable controls, labels on inputs.
 - Toolchain: Vite (multi-page, root `src/pages`) + Vue 3 + TypeScript + vitest. New pages must be added to `rollupOptions.input` in `vite.config.ts`.
+- Style only with the theme variables (`--a1`, `--a2`, `--a3`, `--bg`, ...) from `src/styles/theme.css`; never hard-code accent colours, so every theme keeps working.
 - Put logic in `src/lib` as pure functions with unit tests; keep components thin.

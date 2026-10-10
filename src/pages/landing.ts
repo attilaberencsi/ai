@@ -1,4 +1,5 @@
 import '../styles/theme.css'
+import { initThemePicker } from '../lib/theme'
 import '../styles/landing.css'
 
 // Pointer-follow glow on the section cards (skipped for reduced motion).
@@ -12,3 +13,5 @@ if (!reduce) {
     })
   })
 }
+
+initThemePicker(document.querySelector<HTMLElement>('[data-theme-picker]'))

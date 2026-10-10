@@ -1,5 +1,5 @@
 .grad {
-  background: linear-gradient(90deg, var(--cyan), var(--violet) 55%, var(--pink));
+  background: linear-gradient(90deg, var(--a1), var(--a2) 55%, var(--a3));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -16,10 +16,10 @@
   font: inherit; font-size: 0.9rem; color: var(--muted); background: var(--panel); border: 1px solid var(--border);
   padding: 0.5rem 0.9rem; border-radius: 999px; cursor: pointer; transition: all 0.2s;
 }
-.tab:hover { color: var(--text); border-color: var(--cyan); }
+.tab:hover { color: var(--text); border-color: var(--a1); }
 .tab[aria-selected='true'] {
-  color: var(--text); border-color: var(--cyan);
-  background: linear-gradient(135deg, rgba(56, 232, 255, 0.18), rgba(155, 107, 255, 0.22)); box-shadow: var(--glow);
+  color: var(--text); border-color: var(--a1);
+  background: linear-gradient(135deg, rgb(var(--a1-rgb) / 0.18), rgb(var(--a2-rgb) / 0.22)); box-shadow: var(--glow);
 }
 .count { margin-left: 0.3rem; font-size: 0.75rem; opacity: 0.7; }
 
@@ -30,19 +30,19 @@
   background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(8px);
   transition: border-color 0.2s, box-shadow 0.3s, transform 0.2s;
 }
-.server:hover, .server:focus-within { border-color: rgba(56, 232, 255, 0.55); box-shadow: var(--glow); }
+.server:hover, .server:focus-within { border-color: rgb(var(--a1-rgb) / 0.55); box-shadow: var(--glow); }
 .server header { display: flex; gap: 0.8rem; align-items: center; min-width: 0; }
 .server h2 { margin: 0; font-size: 1.15rem; }
 .avatar {
   flex: none; width: 42px; height: 42px; display: grid; place-items: center; font-weight: 700; border-radius: 12px;
-  background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #05060f;
+  background: linear-gradient(135deg, var(--a1), var(--a2)); color: var(--on-accent);
 }
 .name { display: block; font-size: 0.72rem; color: var(--muted); overflow-wrap: anywhere; }
 .desc { margin: 0; color: var(--muted); line-height: 1.5; font-size: 0.92rem; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; padding: 0; margin: 0; }
 .chip { font-size: 0.7rem; padding: 0.15rem 0.55rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); }
-.chip.hl { color: var(--cyan); border-color: rgba(56, 232, 255, 0.4); }
+.chip.hl { color: var(--a1); border-color: rgb(var(--a1-rgb) / 0.4); }
 
 .install { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; }
 .select {
@@ -51,7 +51,7 @@
 }
 .preview {
   margin: 0; max-height: 7.5rem; overflow: auto; padding: 0.6rem 0.7rem; font-size: 0.72rem; line-height: 1.45;
-  background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border); border-radius: 10px; color: #bfe9ff;
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--code);
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .note { margin: 0; font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
@@ -61,4 +61,4 @@
 .actions { display: flex; gap: 0.5rem; }
 .actions .btn { flex: 1 1 0; }
 .actions .btn.primary { flex: 2 1 0; }
-.target { margin: 0; font-size: 0.75rem; color: var(--cyan); overflow-wrap: anywhere; }
+.target { margin: 0; font-size: 0.75rem; color: var(--a1); overflow-wrap: anywhere; }

@@ -50,7 +50,7 @@ onUnmounted(() => window.removeEventListener('hashchange', readHash))
   <main>
     <section class="page-head">
       <h1>MCP <span class="grad">Servers</span></h1>
-      <p>Pick a category, then install a server into your editor or AI client.</p>
+      <p>Library contains items used and validated by a human (me)</p>
     </section>
 
     <p v-if="status === 'loading'" class="state" role="status">Loading servers…</p>

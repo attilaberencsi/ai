@@ -39,3 +39,6 @@ claude.ai connector prefill (`?modal=add-custom-connector&connectorName&connecto
 ## 2026-10-09 - Install scopes modelled as user / project / local
 One shared Scope enum; each client declares which it supports and falls back to user (or its only scope) otherwise.
 Where a client has no CLI/deep-link for a scope (VS Code workspace, Cursor project, Codex project), we output the config-file snippet instead.
+
+## 2026-10-10 - Themes via CSS variables, green default
+Default green "leaf" theme is the `:root` styling, so it is also the fallback when no theme can be applied. Other themes (neon = the original look, ocean, ember) override variables with `[data-theme]` on `<html>`; choice stored in localStorage (`ai-library-theme`), applied by a tiny inline script in each page head.
