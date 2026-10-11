@@ -65,3 +65,5 @@
 
 .setup { max-height: 6.5rem; overflow-y: auto; margin: 0; padding: 0.55rem 0.8rem 0.55rem 1.5rem; font-size: 0.75rem; line-height: 1.45; color: var(--muted); border-left: 2px solid var(--a1); background: var(--panel); border-radius: 0 10px 10px 0; }
 .setup li + li { margin-top: 0.3rem; }
+.page-head code { padding: 0.1rem 0.4rem; border: 1px solid var(--border); border-radius: 6px; background: var(--code-bg); color: var(--code); font-size: 0.85em; }
+.server footer .more { margin-left: 1rem; }

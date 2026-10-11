@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skills · AI Library</title>
+    <meta name="description" content="Browse agent skills by category and install them with npx skills add." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305120a'/%3E%3Cpath d='M9 24C7 14 13 7 25 7c0 12-6 17-14 17' fill='none' stroke='%234ade80' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M9 24 19 14' stroke='%234ade80' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script>
+      // Apply the saved theme before first paint. Any failure or unknown name leaves the default green theme.
+      try {
+        var t = localStorage.getItem('ai-library-theme')
+        if (t && /^[a-z]+$/.test(t) && t !== 'leaf') document.documentElement.setAttribute('data-theme', t)
+      } catch (e) {}
+    </script>
+    <script type="module" crossorigin src="./assets/skills-CByr6f9k.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/theme-CdBu_jW0.js">
+    <link rel="modulepreload" crossorigin href="./assets/install-B9DfP-6Y.js">
+    <link rel="stylesheet" crossorigin href="./assets/theme-VUE8xD5q.css">
+    <link rel="stylesheet" crossorigin href="./assets/install-CUKfTRhf.css">
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="site-header">
+        <a class="brand" href="./">AI<span>/</span>Library</a>
+        <div class="header-right">
+          <nav class="nav" aria-label="Main">
+          <a href="./mcp-servers.html">MCP Servers</a>
+          <a href="./skills.html" aria-current="page">Skills</a>
+          <a href="https://github.com/attilaberencsi/ai" rel="noopener">GitHub</a>
+        </nav>
+          <div class="theme-picker" data-theme-picker></div>
+        </div>
+      </header>
+      <div id="app"></div>
+    </div>
+    <noscript><p style="text-align: center">This page needs JavaScript.</p></noscript>
+  </body>
+</html>

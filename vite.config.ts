@@ -16,6 +16,7 @@ export default defineConfig({
       input: {
         index: resolve(import.meta.dirname, 'src/pages/index.html'),
         'mcp-servers': resolve(import.meta.dirname, 'src/pages/mcp-servers.html'),
+        skills: resolve(import.meta.dirname, 'src/pages/skills.html'),
       },
     },
   },

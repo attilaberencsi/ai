@@ -48,3 +48,7 @@ Default green "leaf" theme is the `:root` styling, so it is also the fallback wh
 - Install commands include only required (or fixed-value) env vars/headers; optional ones are listed in a note instead.
 - `_meta[io.github.attilaberencsi/catalog].notes` (string[]) carries setup prerequisites shown on the card (add-ons, tokens, limits).
 - The official schema limits `description` to 100 characters; keep long text in `notes`.
+
+## 2026-10-11 - Skills catalog: own schema, `npx skills add` as the install method
+No official registry schema exists for skills, so `registry/skills.json` uses `{ skill, _meta }` with `skill` modelled on SKILL.md frontmatter (`name`, `description`, `license`) plus `source` (owner/repo for `npx skills add`), `repository`, `path`, `website`; validated by our own `registry/schema/skills.schema.json`. The catalog block in `_meta` is shared with servers.
+Install command: `npx skills add <source> --skill <name> [-a <agent>] [-g]` (vercel-labs/skills CLI). Project scope = no `-g`, Global = `-g`.

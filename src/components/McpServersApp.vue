@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import registryUrl from '../../registry/servers.json?url'
 import { categoriesOf, inCategory, loadRegistry } from '../lib/registry'
 import type { ServerEntry } from '../lib/types'
+import CategoryTabs from './CategoryTabs.vue'
 import ServerCard from './ServerCard.vue'
 
 const ALL = 'All'
@@ -13,7 +14,7 @@ const active = ref(ALL)
 
 const categories = computed(() => [ALL, ...categoriesOf(servers.value)])
 const visible = computed(() => inCategory(servers.value, active.value === ALL ? null : active.value))
-const count = (c: string) => inCategory(servers.value, c === ALL ? null : c).length
+const counts = computed(() => Object.fromEntries(categories.value.map((c) => [c, inCategory(servers.value, c === ALL ? null : c).length])))
 
 function readHash() {
   const c = decodeURIComponent(location.hash.replace(/^#/, ''))
@@ -22,14 +23,6 @@ function readHash() {
 function select(c: string) {
   active.value = c
   history.replaceState(null, '', c === ALL ? location.pathname : `#${encodeURIComponent(c)}`)
-}
-function onKey(e: KeyboardEvent, i: number) {
-  const n = categories.value.length
-  const next = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i + n - 1) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1
-  if (next < 0) return
-  e.preventDefault()
-  select(categories.value[next])
-  document.getElementById(`tab-${next}`)?.focus()
 }
 
 onMounted(async () => {
@@ -57,22 +50,7 @@ onUnmounted(() => window.removeEventListener('hashchange', readHash))
     <p v-else-if="status === 'error'" class="state error" role="alert">Could not load the registry: {{ error }}</p>
 
     <template v-else>
-      <div class="tabs" role="tablist" aria-label="Categories">
-        <button
-          v-for="(c, i) in categories"
-          :id="`tab-${i}`"
-          :key="c"
-          role="tab"
-          class="tab"
-          :aria-selected="c === active"
-          :aria-controls="'panel'"
-          :tabindex="c === active ? 0 : -1"
-          @click="select(c)"
-          @keydown="onKey($event, i)"
-        >
-          {{ c }} <span class="count">{{ count(c) }}</span>
-        </button>
-      </div>
+      <CategoryTabs :categories="categories" :active="active" :counts="counts" panel-id="panel" @select="select" />
 
       <div id="panel" role="tabpanel" class="grid">
         <ServerCard v-for="e in visible" :key="`${e.server.name}@${e.server.version}`" :entry="e" />

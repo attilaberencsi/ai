@@ -1,0 +1,53 @@
+{
+  "skills": [
+    {
+      "skill": {
+        "name": "clean-abap",
+        "description": "Clean ABAP StyleGuides. Apply Clean ABAP guidance when creating, refactoring, reviewing, or explaining ABAP artifacts such as classes, interfaces, reports, function modules, and unit tests.",
+        "license": "Apache-2.0",
+        "source": "attilaberencsi/sapskills",
+        "repository": "https://github.com/attilaberencsi/sapskills",
+        "path": "skills/clean-abap",
+        "website": "https://www.sapdev.eu/agentic-skills-for-abap-development/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "ABAP Development",
+          "tags": [
+            "abap",
+            "clean-code",
+            "style-guide"
+          ],
+          "icon": "abap",
+          "notes": [
+            "A distilled version of the Clean ABAP style guide, used to steer agents toward it (no legacy prefixes such as lv_ or ls_)."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "karpathy",
+        "description": "Karpathy Code Guidelines. Apply to all programming languages when creating, refactoring, reviewing, or explaining source code artifacts. Behavioral guidelines for coding agents to reduce common implementation mistakes by surfacing assumptions, preferring simple solutions, keeping edits tightly scoped, and validating against explicit success criteria.",
+        "license": "Apache-2.0",
+        "source": "attilaberencsi/sapskills",
+        "repository": "https://github.com/attilaberencsi/sapskills",
+        "path": "skills/karpathy",
+        "website": "https://www.sapdev.eu/agentic-skills-for-abap-development/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Coding Guidelines",
+          "tags": [
+            "guidelines",
+            "any-language"
+          ],
+          "icon": "rules",
+          "notes": [
+            "Adapted from the MIT-licensed karpathy-guidelines skill in multica-ai/andrej-karpathy-skills."
+          ]
+        }
+      }
+    }
+  ]
+}

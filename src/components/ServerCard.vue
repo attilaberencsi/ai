@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useClipboard } from '../lib/clipboard'
 import { installTargets, launchSpec } from '../lib/install'
 import { catalogOf } from '../lib/registry'
 import type { ServerEntry } from '../lib/types'
@@ -18,27 +19,7 @@ const kind = computed(() => {
 const title = computed(() => server.value.title ?? server.value.name.split('/').pop() ?? server.value.name)
 const repo = computed(() => server.value.repository?.url ?? server.value.websiteUrl)
 
-const copied = ref(false)
-let timer: ReturnType<typeof setTimeout> | undefined
-
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch {
-    // Fallback for non-secure contexts / denied permission.
-    const ta = document.createElement('textarea')
-    ta.value = text
-    ta.style.position = 'fixed'
-    ta.style.opacity = '0'
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    ta.remove()
-  }
-  copied.value = true
-  clearTimeout(timer)
-  timer = setTimeout(() => (copied.value = false), 1800)
-}
+const { copied, copy } = useClipboard()
 </script>
 
 <template>

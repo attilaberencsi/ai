@@ -372,6 +372,82 @@
           ]
         }
       }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.microsoft/playwright-mcp",
+        "title": "Playwright MCP",
+        "description": "Browser automation for AI via Playwright: navigate, click, type and screenshot pages.",
+        "version": "0.0.83",
+        "repository": {
+          "url": "https://github.com/microsoft/playwright-mcp",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "@playwright/mcp",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Browser & Testing",
+          "tags": [
+            "browser",
+            "testing",
+            "automation"
+          ],
+          "icon": "browser",
+          "notes": [
+            "Opens a visible browser by default; add --headless to the server arguments to hide it.",
+            "Uses a temporary profile unless you pass --user-data-dir; --isolated keeps it in memory only.",
+            "To drive your own running Chrome or Edge instead, use --extension (needs the Playwright Extension)."
+          ]
+        }
+      }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.ChromeDevTools/chrome-devtools-mcp",
+        "title": "Chrome DevTools MCP",
+        "description": "Let your AI inspect and debug a live Chrome: console, network, DOM, performance and screenshots.",
+        "version": "1.10.1",
+        "repository": {
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+          "source": "github"
+        },
+        "packages": [
+          {
+            "registryType": "npm",
+            "identifier": "chrome-devtools-mcp",
+            "transport": {
+              "type": "stdio"
+            }
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Browser & Testing",
+          "tags": [
+            "browser",
+            "devtools",
+            "debugging"
+          ],
+          "icon": "devtools",
+          "notes": [
+            "Opens a visible Chrome by default (--headless to hide it); uses its own profile in ~/.cache/chrome-devtools-mcp, or --isolated for a temporary one.",
+            "Requires Node.js 20.19+ (or 22.12+).",
+            "To attach to a Chrome you already run, use --browser-url or --auto-connect (Chrome 144+, remote debugging enabled)."
+          ]
+        }
+      }
     }
   ]
 }

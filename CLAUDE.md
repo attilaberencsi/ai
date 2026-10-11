@@ -16,7 +16,7 @@ reuse the data later. No backend, no server-side code. Not a full registry API i
 
 # Layout (update as it becomes real)
 
-- `registry/servers.json` - the JSON "db"; `registry/schema/server.schema.json` - pinned official schema; `scripts/` - validation (see `.claude/rules/registry-data.md`)
+- `registry/servers.json` and `registry/skills.json` - the JSON "db" files; `registry/schema/server.schema.json` - pinned official schema; `registry/schema/skills.schema.json` - our skills schema; `scripts/` - validation (see `.claude/rules/registry-data.md`)
 - `docs/` - BUILD OUTPUT served by GitHub Pages ("/docs" folder). Generated; never hand-edit.
 - `src/pages/` (HTML entry points + their TS), `src/components/` (Vue), `src/lib/` (pure logic, unit-tested), `src/styles/` (see `.claude/rules/frontend.md`)
 - `documentation/decisions.md` - durable architectural decisions
