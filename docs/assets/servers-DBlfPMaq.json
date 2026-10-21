@@ -448,6 +448,50 @@
           ]
         }
       }
+    },
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "com.sap/abap-adt-mcp-server",
+        "title": "ABAP MCP Server (ADT)",
+        "description": "SAP's ADT MCP server in ABAP Development Tools for VS Code: objects, ATC, unit tests, RAP.",
+        "version": "1.0.0",
+        "websiteUrl": "https://developers.sap.com/tutorials/abap-dev-adt-mcp-server-tools/",
+        "remotes": [
+          {
+            "type": "streamable-http",
+            "url": "http://localhost:2236/mcp",
+            "headers": [
+              {
+                "name": "Authorization",
+                "description": "Bearer <token>, from VS Code settings ADT > MCP Server: Token.",
+                "isRequired": true,
+                "isSecret": true,
+                "default": "Bearer <TOKEN>"
+              }
+            ]
+          }
+        ]
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "SAP Development",
+          "tags": [
+            "sap",
+            "abap",
+            "adt",
+            "rap"
+          ],
+          "icon": "abap",
+          "notes": [
+            "Get the bearer token in VS Code Settings > ADT > MCP Server: Token. The header must read \"Bearer <token>\": keep the word Bearer and the space. Without it the server answers HTTP 400.",
+            "Write access must be enabled and access restrictions configured in VS Code Settings > ADT > MCP.",
+            "You must be logged in to the destination (SAP system) in VS Code ADT.",
+            "Enable it with the setting Adt: Enable MCP Server (default port 2236, changeable in ADT MCP port).",
+            "In GitHub Copilot use Agent mode. Experimental SAP feature: may change without notice, not for productive use."
+          ]
+        }
+      }
     }
   ]
 }

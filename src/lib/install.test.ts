@@ -73,7 +73,11 @@ describe('installOptions', () => {
   })
   it('wraps stdio servers for Claude Desktop config and bridges remotes via mcp-remote', () => {
     expect(JSON.parse(get(npm, 'claude-desktop').copy!).mcpServers['local-mcp'].command).toBe('npx')
-    expect(JSON.parse(get(remote, 'claude-desktop').copy!).mcpServers['hosted-mcp'].args).toEqual(['-y', 'mcp-remote', 'https://mcp.example.com/mcp'])
+    expect(JSON.parse(get(remote, 'claude-desktop').copy!).mcpServers['hosted-mcp']).toEqual({
+      command: 'npx',
+      args: ['-y', 'mcp-remote', 'https://mcp.example.com/mcp', '--header', 'Authorization:${AUTHORIZATION_HEADER}'],
+      env: { AUTHORIZATION_HEADER: '<AUTHORIZATION>' },
+    })
   })
   it('builds Gemini and Codex commands', () => {
     expect(get(remote, 'gemini').copy).toContain('gemini mcp add --transport http')
@@ -114,6 +118,31 @@ describe('optional inputs', () => {
     const r: ServerDetail = { ...remote, remotes: [{ type: 'streamable-http', url: 'https://x/mcp', headers: [{ name: 'Authorization' }] }] }
     expect(get(r, 'claude-code').copy).toBe('claude mcp add --transport http --scope user hosted-mcp https://x/mcp')
     expect(get(r, 'claude-code').note).toContain('headers not included: Authorization')
+  })
+})
+
+describe('remote servers that need an Authorization header', () => {
+  const local: ServerDetail = {
+    name: 'com.example/local-http',
+    description: 'd',
+    version: '1',
+    remotes: [{ type: 'streamable-http', url: 'http://localhost:2236/mcp', headers: [{ name: 'Authorization', isRequired: true, isSecret: true, default: 'Bearer <TOKEN>' }] }],
+  }
+  it('passes the header to Claude Code, Gemini and VS Code', () => {
+    expect(get(local, 'claude-code').copy).toContain("--header 'Authorization: Bearer <TOKEN>'")
+    expect(get(local, 'gemini').copy).toContain("--header 'Authorization: Bearer <TOKEN>'")
+    expect(get(local, 'vscode').copy).toContain('Bearer <TOKEN>')
+  })
+  it('does not drop the token for Codex: uses a bearer token environment variable', () => {
+    const o = get(local, 'codex')
+    expect(o.copy).toBe('codex mcp add local-http --url http://localhost:2236/mcp --bearer-token-env-var LOCAL_HTTP_TOKEN')
+    expect(o.note).toContain('LOCAL_HTTP_TOKEN')
+    expect(get(local, 'codex', 'project').copy).toContain('bearer_token_env_var = "LOCAL_HTTP_TOKEN"')
+  })
+  it('does not drop the token for Claude Desktop and allows plain http through mcp-remote', () => {
+    const entry = JSON.parse(get(local, 'claude-desktop').copy!).mcpServers['local-http']
+    expect(entry.args).toEqual(['-y', 'mcp-remote', 'http://localhost:2236/mcp', '--allow-http', '--header', 'Authorization:${AUTHORIZATION_HEADER}'])
+    expect(entry.env).toEqual({ AUTHORIZATION_HEADER: 'Bearer <TOKEN>' })
   })
 })
 

@@ -48,7 +48,7 @@ const CLIENTS: [id: string, label: string, scopes: Scope[]][] = [
   ['codex', 'Codex CLI', ['user', 'project']],
 ]
 
-const PLACEHOLDER_NOTE = 'Replace <PLACEHOLDER> values with your own credentials before running.'
+const PLACEHOLDER_NOTE = 'Replace only the <PLACEHOLDER> parts with your own credentials and keep the text around them (e.g. the word "Bearer " before a token).'
 
 const placeholder = (name: string) => `<${name.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}>`
 
@@ -148,6 +148,25 @@ function vscodeEntry(spec: LaunchSpec) {
   return { type: 'stdio', command: spec.command, args: spec.args, ...(hasEntries(spec.env) ? { env: spec.env } : {}) }
 }
 
+/**
+ * Claude Desktop only starts local (stdio) servers, so remote ones go through the mcp-remote bridge.
+ * Headers use ${VAR} placeholders filled from `env` (the documented workaround for spaces in args on Windows);
+ * plain http:// URLs need --allow-http.
+ */
+function mcpRemoteEntry(spec: Extract<LaunchSpec, { kind: 'remote' }>) {
+  const env: Record<string, string> = {}
+  const headerArgs = Object.entries(spec.headers).flatMap(([header, value]) => {
+    const variable = `${header.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}_HEADER`
+    env[variable] = value
+    return ['--header', `${header}:\${${variable}}`]
+  })
+  return {
+    command: 'npx',
+    args: ['-y', 'mcp-remote', spec.url, ...(spec.url.startsWith('http://') ? ['--allow-http'] : []), ...headerArgs],
+    ...(hasEntries(env) ? { env } : {}),
+  }
+}
+
 const b64 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)))
 
 // Claude Code's default scope is local, so the flag is only emitted for project/user.
@@ -168,8 +187,20 @@ function geminiCommand(name: string, spec: LaunchSpec, scope: Scope): string {
   return sh(['gemini', 'mcp', 'add', ...scopeFlag, ...envFlags('-e', spec.env), name, spec.command, ...spec.args])
 }
 
+const BEARER = /^Bearer\s/i
+
+/** Codex reads a bearer token from an environment variable; returns its name when the server needs an Authorization: Bearer header. */
+function codexTokenEnvVar(name: string, spec: LaunchSpec): string | undefined {
+  if (spec.kind !== 'remote') return undefined
+  const auth = Object.entries(spec.headers).find(([k, v]) => k.toLowerCase() === 'authorization' && BEARER.test(v))
+  return auth ? `${name.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}_TOKEN` : undefined
+}
+
 function codexCommand(name: string, spec: LaunchSpec): string {
-  if (spec.kind === 'remote') return sh(['codex', 'mcp', 'add', name, '--url', spec.url])
+  if (spec.kind === 'remote') {
+    const tokenVar = codexTokenEnvVar(name, spec)
+    return sh(['codex', 'mcp', 'add', name, '--url', spec.url, ...(tokenVar ? ['--bearer-token-env-var', tokenVar] : [])])
+  }
   return sh(['codex', 'mcp', 'add', name, ...envFlags('--env', spec.env), '--', spec.command, ...spec.args])
 }
 
@@ -178,7 +209,10 @@ const tomlStr = (s: string) => JSON.stringify(s)
 /** Codex config.toml table for a server (used for the project-scoped .codex/config.toml). */
 export function codexToml(name: string, spec: LaunchSpec): string {
   const key = /^[A-Za-z0-9_-]+$/.test(name) ? name : tomlStr(name)
-  if (spec.kind === 'remote') return `[mcp_servers.${key}]\nurl = ${tomlStr(spec.url)}\n`
+  if (spec.kind === 'remote') {
+    const tokenVar = codexTokenEnvVar(name, spec)
+    return `[mcp_servers.${key}]\nurl = ${tomlStr(spec.url)}\n${tokenVar ? `bearer_token_env_var = ${tomlStr(tokenVar)}\n` : ''}`
+  }
   const lines = [`[mcp_servers.${key}]`, `command = ${tomlStr(spec.command)}`, `args = [${spec.args.map(tomlStr).join(', ')}]`]
   if (hasEntries(spec.env)) {
     lines.push('', `[mcp_servers.${key}.env]`, ...Object.entries(spec.env).map(([k, v]) => `${k} = ${tomlStr(v)}`))
@@ -217,7 +251,7 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
   const vscWorkspace = JSON.stringify({ servers: { [name]: entry } }, null, 2)
   const mcpJson = JSON.stringify({ mcpServers: { [name]: clientConfig(spec) } }, null, 2)
   const cursorLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(name)}&config=${encodeURIComponent(b64(JSON.stringify(clientConfig(spec))))}`
-  const desktopEntry = spec.kind === 'remote' ? { command: 'npx', args: ['-y', 'mcp-remote', spec.url] } : clientConfig(spec)
+  const desktopEntry = spec.kind === 'remote' ? mcpRemoteEntry(spec) : clientConfig(spec)
 
   const build = (id: string, scope: Scope): Omit<InstallOption, 'id' | 'label' | 'scopes' | 'scope'> => {
     const note = credNote(scope)
@@ -291,10 +325,19 @@ export function installOptions(server: ServerDetail, requested: Scope = 'user'):
           target: scope === 'project' ? '.gemini/settings.json in the project' : '~/.gemini/settings.json (all projects)',
           note,
         }
-      default: // codex
+      default: { // codex
+        const tokenVar = codexTokenEnvVar(name, spec)
+        const codexNote = join(
+          tokenVar ? `Set the environment variable ${tokenVar} to your token (without the "Bearer " prefix) before starting Codex.` : undefined,
+          spec.kind === 'remote' && Object.keys(spec.headers).some((k) => k.toLowerCase() !== 'authorization')
+            ? 'Codex cannot set other custom headers from this command; add them to config.toml by hand.'
+            : undefined,
+          note,
+        )
         return scope === 'project'
-          ? { copy: codexToml(name, spec), target: '.codex/config.toml in the project (trusted projects only)', note: join('Create or merge into this file.', note) }
-          : { copy: codexCommand(name, spec), target: '~/.codex/config.toml (all projects)', note }
+          ? { copy: codexToml(name, spec), target: '.codex/config.toml in the project (trusted projects only)', note: join('Create or merge into this file.', codexNote) }
+          : { copy: codexCommand(name, spec), target: '~/.codex/config.toml (all projects)', note: codexNote }
+      }
     }
   }
 
