@@ -1,0 +1,396 @@
+{
+  "skills": [
+    {
+      "skill": {
+        "name": "clean-abap",
+        "description": "Clean ABAP StyleGuides. Apply Clean ABAP guidance when creating, refactoring, reviewing, or explaining ABAP artifacts such as classes, interfaces, reports, function modules, and unit tests.",
+        "license": "Apache-2.0",
+        "source": "attilaberencsi/sapskills",
+        "repository": "https://github.com/attilaberencsi/sapskills",
+        "path": "skills/clean-abap",
+        "website": "https://www.sapdev.eu/agentic-skills-for-abap-development/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "ABAP Development",
+          "tags": [
+            "abap",
+            "clean-code",
+            "style-guide"
+          ],
+          "icon": "abap",
+          "notes": [
+            "A distilled version of the Clean ABAP style guide, used to steer agents toward it (no legacy prefixes such as lv_ or ls_)."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "karpathy",
+        "description": "Karpathy Code Guidelines. Apply to all programming languages when creating, refactoring, reviewing, or explaining source code artifacts. Behavioral guidelines for coding agents to reduce common implementation mistakes by surfacing assumptions, preferring simple solutions, keeping edits tightly scoped, and validating against explicit success criteria.",
+        "license": "Apache-2.0",
+        "source": "attilaberencsi/sapskills",
+        "repository": "https://github.com/attilaberencsi/sapskills",
+        "path": "skills/karpathy",
+        "website": "https://www.sapdev.eu/agentic-skills-for-abap-development/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "Coding Guidelines",
+          "tags": [
+            "guidelines",
+            "any-language"
+          ],
+          "icon": "rules",
+          "notes": [
+            "Adapted from the MIT-licensed karpathy-guidelines skill in multica-ai/andrej-karpathy-skills."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-add-remote-service",
+        "description": "Add a remote service integration to an existing CAP Node.js application using the Calesi pattern. Imports external APIs (from other CAP apps or OData/S4 sources), creates consumption views, wires up delegation and data federation handlers, and validates the result with cds watch. Use when a developer wants to consume an external service in their CAP app.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-add-remote-service",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "integration",
+            "odata"
+          ],
+          "icon": "remote",
+          "notes": [
+            "Node.js CAP projects only. Follows the CAP-Level Service Integration (Calesi) pattern."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-developer",
+        "description": "Expert guidance for building and extending CAP (Cloud Application Programming Model) applications in either Node.js or Java. Covers project initialization, CDS modeling, declarative annotations, and custom handler best practices for both runtimes. Use when building a new CAP app, extending an existing one, or reviewing CAP code for correctness and idioms — regardless of whether the stack is Node.js or Java.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-developer",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "cds",
+            "nodejs",
+            "java"
+          ],
+          "icon": "cap",
+          "notes": [
+            "Also available as a Claude Code plugin: /plugin marketplace add capire/skills, then /plugin install cap-developer@cap."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-trivia",
+        "description": "Run an interactive CAP trivia quiz. Picks a topic, searches the CAP documentation via MCP, and asks multiple-choice questions using the question tool. Optionally accepts a topic and difficulty. Use when a developer wants to test or deepen their CAP knowledge.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-trivia",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "quiz",
+            "learning"
+          ],
+          "icon": "quiz",
+          "notes": [
+            "Searches the CAP documentation through an MCP server and asks the questions with the agent's question tool."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-upgrade",
+        "description": "Upgrade a CAP project to the latest CDS version. Drives the `cds upgrade` CLI for CDS 10+ (pattern detection, false-positive filtering, fix categorisation) and handles manual upgrades for earlier versions (major jumps like 7→8, 8→9 as well as minor/patch updates). Use when a developer needs to upgrade CDS in a CAP project, already has a `cds upgrade` report, or wants to move to a newer CDS version.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-upgrade",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "cds",
+            "upgrade"
+          ],
+          "icon": "upgrade",
+          "notes": [
+            "CDS 10+ uses the cds upgrade CLI; earlier versions are upgraded manually."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-cds-review",
+        "description": "Review and assess CDS data models in CAP applications for correctness, best practices, and potential issues. Produces a structured report with severity-rated findings covering naming conventions, associations/compositions, annotations, reuse patterns, service projections, and performance considerations. Use this skill whenever a developer asks to review, audit, or improve their CDS model, or proactively when you notice potential modeling issues while working on a CAP project.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-cds-review",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "cds",
+            "review"
+          ],
+          "icon": "review",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Produces a structured report with severity-rated findings."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-check-setup",
+        "description": "Check and validate a CAP development environment. Inspects Node.js version, npm, @sap/cds-dk, Java, Maven, and optional tools like CF CLI, kubectl, and pack. Reports what is installed, what is outdated, and what is missing. Use when setting up a new machine, onboarding a developer, or diagnosing \"works on my machine\" problems.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-check-setup",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "setup",
+            "environment"
+          ],
+          "icon": "setup",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Reports what is installed, outdated or missing on your machine."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-cql",
+        "description": "Use when querying or modifying entities of CAP services, e.g. via HCQL (see cap-hcql skill). The skill assumes sound existing knowledge of SQL.",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-cql",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "cql",
+            "queries"
+          ],
+          "icon": "query",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Pairs with cap-hcql. Assumes sound SQL knowledge."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-guided-dev",
+        "description": "Guided, step-by-step co-development flow for building a CAP (Cloud Application Programming Model) application together with the developer, one stage at a time, instead of one-shotting the whole app. Walks through eleven stages — rough idea, domain model, services, constraints, custom handlers, plugins, MCPs/agents, authentication/authorization, shipment, operations, and improvements/upgrades — pausing to align with the developer at each step and delegating to the specialist CAP skills as needed. Use this whenever a developer wants to build a CAP app collaboratively, wants a guided or walkthrough experience, is starting a CAP project from a vague idea, or explicitly asks to go step by step rather than generating everything at once.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-guided-dev",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "guided",
+            "workflow"
+          ],
+          "icon": "guide",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Eleven stages from rough idea to operations; delegates to the other CAP skills."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-hcql",
+        "description": "Use when querying CAP services via HCQL protocol endpoints with POST requests and plain text CQL statements in the body. Also read the cap-cql skill!",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-hcql",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "hcql",
+            "queries"
+          ],
+          "icon": "query",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Install together with cap-cql."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-inner-loop",
+        "description": "Use when the user asks to start servers, which services are running, or to query data. Learn how to discover, inspect and consume running services, as well as how to quickly start/stop servers locally in separate, visual terminal windows.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-inner-loop",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "local-dev",
+            "cds-watch"
+          ],
+          "icon": "loop",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Starts and stops servers in separate terminal windows."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-messaging",
+        "description": "Add event-driven pub-sub messaging to a CAP Node.js application. Covers declaring events in CDS, emitting and receiving events with srv.emit/srv.on, the transactional outbox for reliable delivery, local development with file-based-messaging, connecting to production brokers (SAP Event Mesh, SAP Cloud Application Event Hub), and hybrid testing with cds bind. Use this skill whenever a developer wants to add messaging, async events, pub-sub, cross-service event communication, or integrate with a message broker in a CAP app.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-messaging",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "messaging",
+            "events"
+          ],
+          "icon": "events",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Node.js CAP projects. Covers SAP Event Mesh and SAP Cloud Application Event Hub."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-mtx",
+        "description": "Develop and deploy multitenant CAP Node.js SaaS applications using @sap/cds-mtxs. Covers enabling multitenancy, MTX sidecar setup, extensibility and feature toggles, local and hybrid testing, deploying to Cloud Foundry (MTA) and Kyma (Helm), tenant lifecycle management, approuter/XSUAA/IAS wiring, and common deployment pitfalls.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-mtx",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "multitenancy",
+            "saas"
+          ],
+          "icon": "tenants",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "Node.js CAP projects with @sap/cds-mtxs."
+          ]
+        }
+      }
+    },
+    {
+      "skill": {
+        "name": "cap-troubleshooting",
+        "description": "Diagnose and troubleshoot a CAP Node.js application that is not working as expected. Collects diagnostics, checks for common issues, and suggests fixes. Use when cds watch fails, requests return errors, data is missing, or behavior is unexpected. For plain server start/stop and service discovery with no failure involved, use `cap-inner-loop` instead.",
+        "license": "Apache-2.0",
+        "source": "capire/skills",
+        "ref": "devtoberfest",
+        "repository": "https://github.com/capire/skills",
+        "path": "skills/cap-troubleshooting",
+        "website": "https://cap.cloud.sap/"
+      },
+      "_meta": {
+        "io.github.attilaberencsi/catalog": {
+          "category": "CAP Development",
+          "tags": [
+            "cap",
+            "debugging",
+            "troubleshooting"
+          ],
+          "icon": "debug",
+          "notes": [
+            "Not on the main branch yet: installed from the devtoberfest branch of capire/skills.",
+            "For failures only; use cap-inner-loop for plain start/stop."
+          ]
+        }
+      }
+    }
+  ]
+}

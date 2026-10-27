@@ -4,15 +4,47 @@
   "title": "Skill",
   "description": "A skill entry, modelled on SKILL.md frontmatter (Agent Skills). Not part of the official MCP registry schema.",
   "type": "object",
-  "required": ["name", "description", "source", "repository"],
+  "required": [
+    "name",
+    "description",
+    "source",
+    "repository"
+  ],
   "additionalProperties": false,
   "properties": {
-    "name": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 64 },
-    "description": { "type": "string", "minLength": 1, "maxLength": 1024 },
-    "license": { "type": "string" },
-    "source": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", "description": "Source argument for npx skills add (owner/repo)." },
-    "repository": { "type": "string", "format": "uri" },
-    "path": { "type": "string" },
-    "website": { "type": "string", "format": "uri" }
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "license": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "description": "Source argument for npx skills add (owner/repo)."
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri"
+    },
+    "path": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string",
+      "format": "uri"
+    },
+    "ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._/-]+$",
+      "description": "Branch or tag of the source repository when the skill is not on the default branch (npx skills add owner/repo#ref)."
+    }
   }
 }

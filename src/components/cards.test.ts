@@ -14,8 +14,9 @@ describe('SkillCard', () => {
     for (const entry of read('skills.json').skills) {
       const html = await render(SkillCard, { entry })
       expect(html).toContain(entry.skill.name)
-      expect(html).toContain(`npx skills add ${entry.skill.source} --skill ${entry.skill.name} -a claude-code`)
-      expect(html).toContain('Copy install command')
+      expect(html).toContain(`--skill ${entry.skill.name} -a claude-code`)
+      expect(html).toContain(entry.skill.ref ? `branch: ${entry.skill.ref}` : entry.skill.source)
+      expect(html).toContain('Copy command')
     }
   })
   it('lists agent and scope combinations in the dropdown', async () => {

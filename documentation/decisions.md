@@ -52,3 +52,7 @@ Default green "leaf" theme is the `:root` styling, so it is also the fallback wh
 ## 2026-10-11 - Skills catalog: own schema, `npx skills add` as the install method
 No official registry schema exists for skills, so `registry/skills.json` uses `{ skill, _meta }` with `skill` modelled on SKILL.md frontmatter (`name`, `description`, `license`) plus `source` (owner/repo for `npx skills add`), `repository`, `path`, `website`; validated by our own `registry/schema/skills.schema.json`. The catalog block in `_meta` is shared with servers.
 Install command: `npx skills add <source> --skill <name> [-a <agent>] [-g]` (vercel-labs/skills CLI). Project scope = no `-g`, Global = `-g`.
+
+## 2026-10-27 - Skills on a branch; reference check before every push
+Skills that exist only on a branch of a source repo carry `ref` (branch or tag) in `registry/skills.json`; the install source becomes `owner/repo#ref`.
+`npm run check:refs` (`/check-refs`) must pass before every push: it checks that referenced skills, npm/PyPI packages, remote URLs and repositories exist. It caught the retired Railway endpoint class of problem (404) automatically. An opt-in pre-push hook (`.githooks/pre-push`, enable with `npm run setup:hooks`) runs it for pushes made outside Claude too.

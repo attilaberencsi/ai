@@ -20,5 +20,5 @@ export default defineConfig({
       },
     },
   },
-  test: { root: resolve(import.meta.dirname), include: ['src/**/*.test.ts'] },
+  test: { root: resolve(import.meta.dirname), include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'] },
 })

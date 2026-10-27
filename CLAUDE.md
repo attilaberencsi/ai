@@ -16,7 +16,7 @@ reuse the data later. No backend, no server-side code. Not a full registry API i
 
 # Layout (update as it becomes real)
 
-- `registry/servers.json` and `registry/skills.json` - the JSON "db" files; `registry/schema/server.schema.json` - pinned official schema; `registry/schema/skills.schema.json` - our skills schema; `scripts/` - validation (see `.claude/rules/registry-data.md`)
+- `registry/servers.json` and `registry/skills.json` - the JSON "db" files; `registry/schema/server.schema.json` - pinned official schema; `registry/schema/skills.schema.json` - our skills schema; `scripts/` - validation and reference checks (see `.claude/rules/registry-data.md`)
 - `docs/` - BUILD OUTPUT served by GitHub Pages ("/docs" folder). Generated; never hand-edit.
 - `src/pages/` (HTML entry points + their TS), `src/components/` (Vue), `src/lib/` (pure logic, unit-tested), `src/styles/` (see `.claude/rules/frontend.md`)
 - `documentation/decisions.md` - durable architectural decisions
@@ -41,6 +41,9 @@ reuse the data later. No backend, no server-side code. Not a full registry API i
 - Typecheck: `npm run typecheck`
 - Test: `npm test`
 - Registry validation: `npm run validate:registry`
+- Reference check (skills, MCP packages, remote URLs and repos still exist; ~2s, cached 12h): `npm run check:refs` (`-- --refresh` skips the cache), also available as the `/check-refs` skill
 - Lint: none yet
+
+Before every `git push`: run `npm run check:refs` (or `/check-refs`) and do not push while it reports failed references; warnings are fine to push but mention them. Optional: `npm run setup:hooks` enables a git pre-push hook that runs the same check.
 
 Add regression coverage for changed behavior. Report failed or skipped checks explicitly.

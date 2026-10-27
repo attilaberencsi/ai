@@ -56,7 +56,7 @@ for (const [i, entry] of (skills.skills ?? []).entries()) {
   if (!validateSkill(entry.skill)) {
     for (const e of validateSkill.errors ?? []) errors.push(`${label}: skill${e.instancePath} ${e.message}`)
   }
-  const key = `${entry.skill?.source}/${entry.skill?.name}`
+  const key = `${entry.skill?.source}#${entry.skill?.ref ?? ''}/${entry.skill?.name}`
   if (seenSkills.has(key)) errors.push(`${label}: duplicate source/name`)
   seenSkills.add(key)
   const meta = entry._meta?.[CATALOG_KEY]

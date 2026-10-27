@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { skillCommand, skillTargets, sortSkills } from './skills'
+import { skillBrowseCommand, skillCommand, skillListCommand, skillSource, skillTargets, sortSkills } from './skills'
 import { CATALOG_KEY, type Skill, type SkillEntry } from './types'
 
 const skill: Skill = { name: 'clean-abap', description: 'd', source: 'attilaberencsi/sapskills', repository: 'https://github.com/attilaberencsi/sapskills' }
@@ -12,6 +12,36 @@ describe('skillCommand', () => {
   it('adds the agent and the global flag', () => {
     expect(skillCommand(skill, 'claude-code')).toBe('npx skills add attilaberencsi/sapskills --skill clean-abap -a claude-code')
     expect(skillCommand(skill, 'github-copilot', true)).toBe('npx skills add attilaberencsi/sapskills --skill clean-abap -a github-copilot -g')
+  })
+})
+
+describe('skills on a branch', () => {
+  const onBranch: Skill = { ...skill, name: 'cap-mtx', source: 'capire/skills', ref: 'devtoberfest' }
+  it('uses owner/repo#ref as the source', () => {
+    expect(skillSource(onBranch)).toBe('capire/skills#devtoberfest')
+    expect(skillSource(skill)).toBe('attilaberencsi/sapskills')
+  })
+  it('quotes the source so the # is safe in a shell', () => {
+    expect(skillCommand(onBranch)).toBe("npx skills add 'capire/skills#devtoberfest' --skill cap-mtx")
+    expect(skillTargets(onBranch).every((t) => t.copy!.includes("'capire/skills#devtoberfest'"))).toBe(true)
+  })
+})
+
+describe('browsing the whole repository', () => {
+  const onBranch: Skill = { ...skill, name: 'cap-cds-review', source: 'capire/skills', ref: 'devtoberfest' }
+  it('browse has no --skill, so the CLI lists the repo and lets you choose', () => {
+    expect(skillBrowseCommand(onBranch)).toBe("npx skills add 'capire/skills#devtoberfest'")
+    expect(skillBrowseCommand(skill)).toBe('npx skills add attilaberencsi/sapskills')
+  })
+  it('list only previews', () => {
+    expect(skillListCommand(onBranch)).toBe("npx skills add 'capire/skills#devtoberfest' --list")
+  })
+  it('are the first two dropdown entries', () => {
+    const targets = skillTargets(onBranch)
+    expect(targets.slice(0, 2).map((t) => t.key)).toEqual(['browse', 'list'])
+    expect(targets[0].copy).not.toContain('--skill')
+    expect(targets[1].copy).toContain('--list')
+    expect(targets.slice(2).every((t) => t.copy!.includes('--skill cap-cds-review'))).toBe(true)
   })
 })
 

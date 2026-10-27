@@ -67,6 +67,8 @@ export interface Skill {
   license?: string
   /** Source argument for `npx skills add`, e.g. "owner/repo". */
   source: string
+  /** Branch or tag when the skill is not on the default branch. */
+  ref?: string
   /** Repository URL (for the "Repository" link). */
   repository: string
   /** Path of the skill inside the repository. */

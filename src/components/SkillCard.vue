@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useClipboard } from '../lib/clipboard'
 import { catalogOf } from '../lib/registry'
-import { skillTargets } from '../lib/skills'
+import { skillSource, skillTargets } from '../lib/skills'
 import type { SkillEntry } from '../lib/types'
 
 const props = defineProps<{ entry: SkillEntry }>()
@@ -22,14 +22,15 @@ const { copied, copy } = useClipboard()
       <span class="avatar" aria-hidden="true">{{ skill.name.charAt(0).toUpperCase() }}</span>
       <div>
         <h2>{{ skill.name }}</h2>
-        <code class="name">{{ skill.source }}</code>
+        <code class="name">{{ skillSource(skill) }}</code>
       </div>
     </header>
 
     <p class="desc">{{ skill.description }}</p>
 
     <ul class="chips" aria-label="Details">
-      <li v-if="skill.license" class="chip hl">{{ skill.license }}</li>
+      <li v-if="skill.ref" class="chip hl" title="Not on the default branch yet">branch: {{ skill.ref }}</li>
+      <li v-if="skill.license" class="chip">{{ skill.license }}</li>
       <li v-for="t in meta.tags ?? []" :key="t" class="chip">{{ t }}</li>
     </ul>
 
@@ -45,7 +46,7 @@ const { copied, copy } = useClipboard()
 
       <div class="actions">
         <button class="btn primary" :disabled="!selected?.copy" @click="selected?.copy && copy(selected.copy)">
-          {{ copied ? 'Copied ✓' : 'Copy install command' }}
+          {{ copied ? 'Copied ✓' : 'Copy command' }}
         </button>
       </div>
 

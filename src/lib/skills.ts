@@ -30,21 +30,55 @@ export const SKILL_AGENTS: { id: string; label: string; project: string; global:
 
 const SCOPE_NAME: Partial<Record<Scope, string>> = { project: 'Project', user: 'Global' }
 
+/** Source argument for the CLI: `owner/repo`, or `owner/repo#ref` for a branch or tag. */
+export const skillSource = (skill: Skill): string => (skill.ref ? `${skill.source}#${skill.ref}` : skill.source)
+
 /** `npx skills add <source> --skill <name> [-a <agent>] [-g]` */
 export function skillCommand(skill: Skill, agentId?: string, global = false): string {
-  const parts = ['npx', 'skills', 'add', skill.source, '--skill', skill.name]
+  const parts = ['npx', 'skills', 'add', skillSource(skill), '--skill', skill.name]
   if (agentId) parts.push('-a', agentId)
   if (global) parts.push('-g')
   return parts.map(shellQuote).join(' ')
 }
 
-/** One entry per (agent, scope), plus "choose in the terminal" entries that leave the agent choice to the CLI. */
+/** Without `--skill` the CLI lists the repository's skills and lets you pick skills, agents and scope in the terminal. */
+export const skillBrowseCommand = (skill: Skill): string => ['npx', 'skills', 'add', skillSource(skill)].map(shellQuote).join(' ')
+
+/** Only shows the skills available in the repository; installs nothing. */
+export const skillListCommand = (skill: Skill): string => [skillBrowseCommand(skill), '--list'].join(' ')
+
+/**
+ * Dropdown entries: first the two ways to look at the whole repository (browse and pick, or just list), then one entry
+ * per (agent, scope) that installs exactly this skill. "Pick agents in terminal" installs this skill but lets you choose the agents.
+ */
 export function skillTargets(skill: Skill): InstallOption[] {
+  const repoWide: InstallOption[] = [
+    {
+      id: 'browse',
+      key: 'browse',
+      label: 'Browse all skills in this repo (terminal)',
+      scopes: ['project', 'user'],
+      scope: 'project',
+      copy: skillBrowseCommand(skill),
+      target: 'wherever you choose in the terminal (skills, agents and scope)',
+      note: 'Lists every skill in the repository and lets you pick which to install - this skill is one of them.',
+    },
+    {
+      id: 'list',
+      key: 'list',
+      label: 'List skills in this repo (preview only)',
+      scopes: ['project', 'user'],
+      scope: 'project',
+      copy: skillListCommand(skill),
+      target: 'nowhere (preview only, nothing is installed)',
+      note: 'Only shows the skills available in the repository.',
+    },
+  ]
   const entries: { id: string; label: string; project: string; global: string; agentId?: string }[] = [
-    { id: 'interactive', label: 'Choose agents in terminal', project: 'the agent folders you pick', global: 'the agent folders you pick' },
+    { id: 'interactive', label: 'Pick agents in terminal', project: 'the agent folders you pick', global: 'the agent folders you pick' },
     ...SKILL_AGENTS.map((a) => ({ ...a, agentId: a.id })),
   ]
-  return entries.flatMap((a) =>
+  const perAgent = entries.flatMap((a) =>
     (['project', 'user'] as const).map((scope): InstallOption => {
       const global = scope === 'user'
       return {
@@ -61,4 +95,5 @@ export function skillTargets(skill: Skill): InstallOption[] {
       }
     }),
   )
+  return [...repoWide, ...perAgent]
 }

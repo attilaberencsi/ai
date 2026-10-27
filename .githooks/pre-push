@@ -1,0 +1,9 @@
+#!/bin/sh
+# Opt-in git hook: enable it once with `npm run setup:hooks`.
+# Blocks a push when something the registry refers to (skills, MCP packages, remote URLs, repos) no longer exists.
+# Fast: about 40 references in a couple of seconds, cached for 12 hours. Skip once with `git push --no-verify`.
+echo "pre-push: checking registry references..."
+npm run --silent check:refs || {
+  echo "pre-push: push blocked. Fix the failed references (see above), or run git push --no-verify to skip the check."
+  exit 1
+}
