@@ -41,33 +41,55 @@ export function skillCommand(skill: Skill, agentId?: string, global = false): st
   return parts.map(shellQuote).join(' ')
 }
 
-/** Without `--skill` the CLI lists the repository's skills and lets you pick skills, agents and scope in the terminal. */
-export const skillBrowseCommand = (skill: Skill): string => ['npx', 'skills', 'add', skillSource(skill)].map(shellQuote).join(' ')
+/** Without `--skill` the CLI shows a checklist of the repository's skills; `-g` installs globally and skips the scope question. */
+export const skillBrowseCommand = (skill: Skill, global = false): string =>
+  ['npx', 'skills', 'add', skillSource(skill), ...(global ? ['-g'] : [])].map(shellQuote).join(' ')
 
 /** Only shows the skills available in the repository; installs nothing. */
 export const skillListCommand = (skill: Skill): string => [skillBrowseCommand(skill), '--list'].join(' ')
 
+/** Every flag the generated commands use; scripts/check-refs.ts verifies them against `npx skills add --help`. */
+export const SKILLS_CLI_FLAGS = ['--skill', '-a', '-g', '--list'] as const
+
 /**
- * Dropdown entries: first the two ways to look at the whole repository (browse and pick, or just list), then one entry
- * per (agent, scope) that installs exactly this skill. "Pick agents in terminal" installs this skill but lets you choose the agents.
+ * What a generated command really does, read from its syntax (behaviour taken from the skills CLI source):
+ * - without `--skill` (and without `--list`) the CLI asks which skills to install;
+ * - without `-a` it installs to the agents it detects on the machine and asks only when it finds several (or none),
+ *   so no command can promise "you pick the agents": `agents: 'detected'`;
+ * - without `-g` it asks for the scope (there is no flag for "project", so Project entries still show that question).
+ */
+export function describeSkillCommand(command: string) {
+  const t = command.split(' ')
+  const list = t.includes('--list')
+  return {
+    installs: !list,
+    asksSkills: !list && !t.includes('--skill'),
+    agents: t.includes('-a') ? ('fixed' as const) : ('detected' as const),
+    asksScope: !list && !t.includes('-g'),
+  }
+}
+
+/**
+ * Dropdown entries: first the two ways to look at the whole repository, then one entry per (agent, scope) that installs
+ * exactly this skill. Texts must match `describeSkillCommand` (enforced by tests): "detected agents" is not a picker.
  */
 export function skillTargets(skill: Skill): InstallOption[] {
   const repoWide: InstallOption[] = [
     {
       id: 'browse',
       key: 'browse',
-      label: 'Browse all skills in this repo (terminal)',
-      scopes: ['project', 'user'],
+      label: 'Browse and choose skills in this repo (terminal)',
+      scopes: ['project'],
       scope: 'project',
       copy: skillBrowseCommand(skill),
-      target: 'wherever you choose in the terminal (skills, agents and scope)',
-      note: 'Lists every skill in the repository and lets you pick which to install - this skill is one of them.',
+      target: 'asks you which skills and scope; agents are detected (asked only if several are found)',
+      note: 'Shows a checklist of every skill in the repository. Nothing is installed until you confirm.',
     },
     {
       id: 'list',
       key: 'list',
       label: 'List skills in this repo (preview only)',
-      scopes: ['project', 'user'],
+      scopes: ['project'],
       scope: 'project',
       copy: skillListCommand(skill),
       target: 'nowhere (preview only, nothing is installed)',
@@ -75,7 +97,7 @@ export function skillTargets(skill: Skill): InstallOption[] {
     },
   ]
   const entries: { id: string; label: string; project: string; global: string; agentId?: string }[] = [
-    { id: 'interactive', label: 'Pick agents in terminal', project: 'the agent folders you pick', global: 'the agent folders you pick' },
+    { id: 'detected', label: 'Auto detect target agent', project: 'the agents the CLI detects here', global: 'the agents the CLI detects here' },
     ...SKILL_AGENTS.map((a) => ({ ...a, agentId: a.id })),
   ]
   const perAgent = entries.flatMap((a) =>
@@ -89,9 +111,9 @@ export function skillTargets(skill: Skill): InstallOption[] {
         scope,
         copy: skillCommand(skill, a.agentId, global),
         target: global ? `${a.global} (all your projects)` : `${a.project} in the folder you run it from (commit it to share)`,
-        note: global
-          ? 'Installs for your user account, available in every project.'
-          : 'Run this in your project folder. Add -y to skip the confirmation prompts.',
+        note:
+          (!a.agentId ? 'Installs this skill to the agents the CLI detects on this machine; it asks only if it finds several (or none), so choose an agent below to be exact. ' : '') +
+          (global ? 'Installs for your user account, available in every project.' : 'Run this in your project folder. The CLI asks for the scope: choose Project.'),
       }
     }),
   )

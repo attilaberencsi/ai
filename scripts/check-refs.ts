@@ -7,8 +7,10 @@
 //   npm run check:refs -- --registry <dir>  check another folder (always uncached)
 //
 // Exit code: 0 all fine (warnings allowed), 1 something is gone or wrong, 2 the network could not be reached at all.
+import { execSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { SKILLS_CLI_FLAGS } from '../src/lib/skills'
 import { type Check, type Outcome, collectChecks, judgeRemoteStatus, parseFrontmatter } from './refs-lib'
 
 const root = resolve(import.meta.dirname, '..')
@@ -146,6 +148,21 @@ try {
   // The cache is an optimisation only.
 }
 
+// The install commands on the skills page use flags of `npx skills add`; make sure that CLI still has them.
+let cliProblem = false
+if (dirArg === -1) {
+  try {
+    const help = execSync('npx --yes skills add --help', { encoding: 'utf8', timeout: 60_000, stdio: ['ignore', 'pipe', 'ignore'] })
+    const missing = SKILLS_CLI_FLAGS.filter((f) => !help.includes(f))
+    if (missing.length) {
+      cliProblem = true
+      console.log(`✘ cli    skills add: the CLI no longer lists ${missing.join(', ')} (src/lib/skills.ts builds commands with them)`)
+    }
+  } catch {
+    console.log('⚠ cli    could not run `npx skills add --help`; command flags not verified')
+  }
+}
+
 const secs = ((Date.now() - started) / 1000).toFixed(1)
 console.log(
   `\nChecked ${checks.length} references in ${secs}s: ${outcomes.length - failures - warnings} ok, ${cached} cached, ${warnings} warnings, ${failures} failed, ${skipped.length} skipped (local or unsupported).`,
@@ -154,7 +171,7 @@ if (todo.length > 0 && networkFailures === todo.length) {
   console.error('Could not reach the network, so nothing was verified. Check your connection and run again.')
   process.exit(2)
 }
-if (failures) {
+if (failures || cliProblem) {
   console.error('Fix or remove the failed references in registry/servers.json and registry/skills.json before pushing.')
   process.exit(1)
 }

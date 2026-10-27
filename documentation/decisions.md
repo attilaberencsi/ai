@@ -56,3 +56,6 @@ Install command: `npx skills add <source> --skill <name> [-a <agent>] [-g]` (ver
 ## 2026-10-27 - Skills on a branch; reference check before every push
 Skills that exist only on a branch of a source repo carry `ref` (branch or tag) in `registry/skills.json`; the install source becomes `owner/repo#ref`.
 `npm run check:refs` (`/check-refs`) must pass before every push: it checks that referenced skills, npm/PyPI packages, remote URLs and repositories exist. It caught the retired Railway endpoint class of problem (404) automatically. An opt-in pre-push hook (`.githooks/pre-push`, enable with `npm run setup:hooks`) runs it for pushes made outside Claude too.
+
+## 2026-10-27 - Skills page texts must match the command syntax
+The skills CLI asks which agents to use only when it detects several (or none); with exactly one it installs silently, and no flag forces the question. So the dropdown never promises "pick agents": the no-`-a` entry is "Auto detect target agent". Without `-g` the CLI always asks Project/Global, which the Project notes say. `describeSkillCommand` (src/lib/skills.ts) derives what a command does from its syntax; unit tests compare it with every dropdown label/note, and `npm run check:refs` verifies the used flags against `npx skills add --help`. Change a command or a text only together with these tests.

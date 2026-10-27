@@ -19,4 +19,5 @@ seconds, cached for 12 hours) and needs no extra tools.
 
 What it checks: skills (SKILL.md exists at the right repository, branch and path, and its `name` matches), npm and PyPI
 packages (and pinned versions), public remote MCP URLs (answers other than "gone"), and GitHub repositories.
+Also checks that every flag used by the skills page commands (`SKILLS_CLI_FLAGS` in `src/lib/skills.ts`) still exists in `npx skills add --help`.
 Not checked: `localhost` URLs and OCI/mcpb packages (reported as skipped).
